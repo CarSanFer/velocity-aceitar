@@ -26,6 +26,7 @@
   .nav .logo{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--gold),#a9781f);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#1a2b40}
   .nav .ttl{font-size:14.5px;line-height:1.05}
   .nav .ttl small{display:block;font-size:10px;font-weight:500;color:#aebed3;letter-spacing:.6px;text-transform:uppercase}
+  .nav .ttl .ver-line{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--gold);letter-spacing:.3px;text-transform:none;margin-top:1px}
   .nav .spacer{flex:1}
   .badge-ver{font-family:var(--mono);font-size:10.5px;font-weight:600;color:#1a2b40;background:var(--gold);padding:3px 8px;border-radius:5px;letter-spacing:.3px}
   .sb-dot{width:8px;height:8px;border-radius:50%;background:#6b7785;display:inline-block;transition:.2s;box-shadow:0 0 0 2px rgba(255,255,255,.15)}
@@ -173,7 +174,7 @@
 <div class="nav">
   <div class="brand">
     <div class="logo">V</div>
-    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small></div>
+    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.05.28.1559</small></div>
   </div>
   <div class="spacer"></div>
   <label class="nav-deploy" id="btn-deploy" title="Deploy para GitHub / Vercel">🚀 Deploy
@@ -184,7 +185,7 @@
     <button id="lang-en" onclick="setLang('en')">EN</button>
   </div>
   <span id="sb-dot" class="sb-dot" title="Supabase"></span>
-  <span class="badge-ver">v26.05.28.1550</span>
+  <span class="badge-ver" id="ver-badge">v26.05.28.1559</span>
 </div>
 
 <div class="wrap">
@@ -483,6 +484,9 @@ const I18N={
   "vs":"vs","prev":"plan.","of":"of"
  }
 };
+/* ============================ version (single source) ============================ */
+const APP_VER='v26.05.28.1559';
+
 let LANG = (localStorage_safe('get','ace_fisc_lang')) || 'pt';
 const t = k => (I18N[LANG][k] ?? k);
 
@@ -932,6 +936,8 @@ function applyLang(){
 
 /* ============================ boot ============================ */
 (async function init(){
+  document.getElementById('ver-badge').textContent=APP_VER;
+  document.getElementById('ver-line').textContent=APP_VER;
   set('m-data',new Date().toISOString().slice(0,10)); state.meta.data=val('m-data');
   setLang(LANG);
   writeForm();
