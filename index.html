@@ -35,6 +35,8 @@
   .nav .btn-lang{display:flex;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);border-radius:7px;overflow:hidden}
   .nav .btn-lang button{background:none;border:0;color:#cdd9e8;font-family:var(--sans);font-size:12px;font-weight:600;padding:5px 10px;cursor:pointer}
   .nav .btn-lang button.on{background:#fff;color:var(--navy)}
+  .nav-deploy{display:flex;align-items:center;gap:5px;cursor:pointer;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.20);color:#dbe6f2;font-size:11.5px;font-weight:600;border-radius:7px;padding:5px 10px;transition:.12s;font-family:var(--sans);white-space:nowrap}
+  .nav-deploy:hover{background:rgba(255,255,255,.18);color:#fff}
 
   .wrap{max-width:1180px;margin:0 auto;padding:18px 18px 80px}
 
@@ -144,6 +146,12 @@
   .scrim.on{opacity:1;pointer-events:auto}
 
   .meta-strip{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:12px;color:var(--muted);margin-top:6px}
+  .ov-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .ovt tbody tr.ovrow{cursor:pointer;transition:.1s}
+  .ovt tbody tr.ovrow:hover td{background:#f4f8fc}
+  .ovt tbody tr.ovrow.active td{background:#fdf8ee}
+  .ovt td{padding:8px 10px;border-bottom:1px solid var(--line-2)}
+  .ovt th{cursor:default}
   .meta-strip b{color:var(--navy)}
   .req{color:var(--risk)}
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(20,35,60,.25);opacity:0;pointer-events:none;transition:.25s;z-index:90}
@@ -168,12 +176,15 @@
     <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small></div>
   </div>
   <div class="spacer"></div>
+  <label class="nav-deploy" id="btn-deploy" title="Deploy para GitHub / Vercel">🚀 Deploy
+    <input type="file" accept=".html,.sql" style="display:none" onchange="deployToGitHub(this)">
+  </label>
   <div class="btn-lang">
     <button id="lang-pt" class="on" onclick="setLang('pt')">PT</button>
     <button id="lang-en" onclick="setLang('en')">EN</button>
   </div>
   <span id="sb-dot" class="sb-dot" title="Supabase"></span>
-  <span class="badge-ver">v26.05.27.1910</span>
+  <span class="badge-ver">v26.05.28.1550</span>
 </div>
 
 <div class="wrap">
@@ -188,6 +199,25 @@
     <button class="btn btn-out" onclick="openHist()">🗂 <span data-i18n="tb.hist">Histórico</span> (<span id="hist-count">0</span>)</button>
     <button class="btn btn-navy" onclick="saveReport()" data-i18n="tb.save">Guardar</button>
   </div>
+
+  <!-- Vistas por Obra -->
+  <section class="card sec" id="sec-ov">
+    <div class="sec-head" onclick="toggleSec(this)">
+      <div class="n">▦</div>
+      <h2 data-i18n="ov.title">Relatórios por Obra</h2>
+      <span class="sub" data-i18n="ov.sub">Consultar e abrir períodos guardados</span>
+      <span class="chev">▾</span>
+    </div>
+    <div class="sec-body">
+      <div class="ov-bar">
+        <label class="lab" style="margin:0" data-i18n="ov.filter">Obra</label>
+        <select class="inp" id="ov-obra" style="max-width:340px" onchange="ovFilter=this.value;renderObraView()"></select>
+        <div style="flex:1"></div>
+        <button class="btn btn-out btn-sm" onclick="refreshDB()">↻ <span data-i18n="ov.refresh">Atualizar</span></button>
+      </div>
+      <div id="ov-table"></div>
+    </div>
+  </section>
 
   <!-- Dashboard -->
   <div class="card">
@@ -414,6 +444,9 @@ const I18N={
   "pe.id":"Id","pe.data":"Data","pe.desc":"Descrição","pe.motivo":"Motivo","pe.desc.ph":"Descrição","pe.motivo.ph":"Motivo / estado",
   "s8.h":"Observações Gerais","s8.ph":"Notas finais, conclusões e recomendações do período…",
   "hist.h":"Histórico de períodos",
+  "ov.title":"Relatórios por Obra","ov.sub":"Consultar e abrir períodos guardados","ov.filter":"Obra","ov.refresh":"Atualizar","ov.refreshed":"Lista atualizada",
+  "ov.all":"Todas as obras","ov.empty":"Sem relatórios guardados. Preenche um período e carrega em Guardar.","ov.open":"Abrir relatório",
+  "ov.col.obra":"Obra","ov.col.per":"Período","ov.col.autor":"Autor","ov.col.exec":"Exec. TN","ov.col.desv":"Desvio","ov.col.feel":"Feeling","ov.col.upd":"Atualizado",
   "k.exec":"Execução TN","k.desvio":"Desvio","k.tcap":"TC aprovados","k.tcpor":"TC por aprovar","k.divida":"Em dívida","k.feel":"Feeling","k.prazo":"dias p/ prazo",
   "kf.ok":"Favorável","kf.warn":"Atenção","kf.risk":"Crítico","kf.na":"—",
   "msg.saved":"Período guardado","msg.del":"Período eliminado","msg.need":"Indique Data e Obra antes de guardar","msg.cloned":"Criado a partir do último — atualize a Data e o Período","msg.nolast":"Não existe período anterior para esta obra","msg.new":"Novo período em branco","msg.loaded":"Período carregado","msg.exp":"JSON exportado",
@@ -440,6 +473,9 @@ const I18N={
   "pe.id":"Id","pe.data":"Date","pe.desc":"Description","pe.motivo":"Reason","pe.desc.ph":"Description","pe.motivo.ph":"Reason / status",
   "s8.h":"General Remarks","s8.ph":"Final notes, conclusions and recommendations for the period…",
   "hist.h":"Period history",
+  "ov.title":"Reports by Project","ov.sub":"Browse and open saved periods","ov.filter":"Project","ov.refresh":"Refresh","ov.refreshed":"List refreshed",
+  "ov.all":"All projects","ov.empty":"No saved reports yet. Fill a period and press Save.","ov.open":"Open report",
+  "ov.col.obra":"Project","ov.col.per":"Period","ov.col.autor":"Author","ov.col.exec":"NW exec.","ov.col.desv":"Deviation","ov.col.feel":"Feeling","ov.col.upd":"Updated",
   "k.exec":"NW progress","k.desvio":"Deviation","k.tcap":"CW approved","k.tcpor":"CW pending","k.divida":"Outstanding","k.feel":"Feeling","k.prazo":"days to deadline",
   "kf.ok":"Favourable","kf.warn":"Caution","kf.risk":"Critical","kf.na":"—",
   "msg.saved":"Period saved","msg.del":"Period deleted","msg.need":"Enter Date and Project before saving","msg.cloned":"Created from last — update Date and Period","msg.nolast":"No previous period for this project","msg.new":"New blank period","msg.loaded":"Period loaded","msg.exp":"JSON exported",
@@ -500,7 +536,7 @@ async function loadDB(){
 }
 
 /* ============================ state ============================ */
-let state = blank();
+var state = blank();
 let DB = [];
 let editingId = null;
 
@@ -706,7 +742,7 @@ async function saveReport(){
   try{
     await SB.upsert(row);
     DB=await loadDB();
-    renderHist();
+    renderHist(); renderObraView();
     toast(t('msg.saved'));
   }catch(e){ sbStatus('err'); toast('⚠ '+e.message); }
 }
@@ -731,7 +767,7 @@ function cloneLast(){
 }
 function loadRecord(id){
   const r=DB.find(x=>x.id===id); if(!r) return;
-  state=structuredClone(r._payload||blank()); editingId=id; writeForm(); recalc(); renderHist(); closeHist(); window.scrollTo({top:0,behavior:'smooth'}); toast(t('msg.loaded'));
+  state=structuredClone(r._payload||blank()); editingId=id; writeForm(); recalc(); renderHist(); renderObraView(); closeHist(); window.scrollTo({top:0,behavior:'smooth'}); toast(t('msg.loaded'));
 }
 async function deleteRecord(id,ev){
   ev?.stopPropagation();
@@ -741,7 +777,7 @@ async function deleteRecord(id,ev){
     await SB.del(id);
     if(editingId===id){ editingId=null; }
     DB=await loadDB();
-    renderHist(); toast(t('msg.del'));
+    renderHist(); renderObraView(); toast(t('msg.del'));
   }catch(e){ sbStatus('err'); toast('⚠ '+e.message); }
 }
 function dirty(){ return JSON.stringify(state)!==JSON.stringify(blank()) && (state.meta.obra||state.tn.total||state.tc.length||state.pe.length); }
@@ -754,6 +790,55 @@ function exportJSON(){
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=`fisc_${obra}_${state.meta.data||'periodo'}.json`; a.click();
   toast(t('msg.exp'));
+}
+
+/* ============================ deploy → GitHub/Vercel ============================ */
+const GITHUB_REPO='CarSanFer/velocity-aceitar';
+function pathForFile(name){
+  let clean=name.replace(/\s*\(\d+\)(?=\.[^.]+$)/,'');
+  if(clean.toLowerCase().endsWith('.html')) return 'index.html';
+  if(clean.toLowerCase().endsWith('.sql'))  return 'db/'+clean;
+  return clean;
+}
+async function deployToGitHub(input){
+  const file=input.files[0]; if(!file) return;
+  const targetPath=pathForFile(file.name);
+  const text=await file.text();
+  if(targetPath==='index.html' && !text.trim().toLowerCase().startsWith('<!doctype html')){
+    if(!confirm('⚠️ Este ficheiro não parece ser HTML mas vai para index.html.\n\nIsto pode partir o site. Continuar?')){ input.value=''; return; }
+  }
+  const btn=document.getElementById('btn-deploy');
+  const origText=btn.innerHTML;
+  btn.innerHTML='⏳ '+targetPath+'…'; btn.style.pointerEvents='none';
+  let token=localStorage.getItem('gh_token');
+  if(!token){
+    token=prompt('GitHub Personal Access Token (scope: repo):');
+    if(!token){ btn.innerHTML=origText; btn.style.pointerEvents=''; return; }
+    localStorage.setItem('gh_token',token.trim());
+  }
+  try{
+    const bytes=new TextEncoder().encode(text);
+    let binary=''; const chunk=8192;
+    for(let i=0;i<bytes.length;i+=chunk){ binary+=String.fromCharCode(...bytes.subarray(i,i+chunk)); }
+    const encoded=btoa(binary);
+    const getResp=await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${targetPath}`,{
+      headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json'}
+    });
+    const existing=getResp.ok?await getResp.json():null;
+    const sha=existing?.sha;
+    const putResp=await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${targetPath}`,{
+      method:'PUT',
+      headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','Content-Type':'application/json'},
+      body:JSON.stringify({message:`Deploy ${targetPath} — ${new Date().toLocaleString('pt-PT')}`,content:encoded,...(sha?{sha}:{})})
+    });
+    if(!putResp.ok){ const err=await putResp.json(); throw new Error(err.message||'Erro no deploy'); }
+    btn.innerHTML='✅ '+targetPath;
+    setTimeout(()=>{ btn.innerHTML=origText; btn.style.pointerEvents=''; },3000);
+  }catch(e){
+    alert('Erro no deploy: '+e.message);
+    localStorage.removeItem('gh_token');
+    btn.innerHTML=origText; btn.style.pointerEvents='';
+  }
 }
 
 /* ============================ history ============================ */
@@ -777,6 +862,46 @@ function renderHist(){
 }
 function openHist(){ renderHist(); document.getElementById('hist').classList.add('open'); document.getElementById('scrim').classList.add('on'); }
 function closeHist(){ document.getElementById('hist').classList.remove('open'); document.getElementById('scrim').classList.remove('on'); }
+
+/* ============================ vistas por obra ============================ */
+var ovFilter='';
+async function refreshDB(){ DB=await loadDB(); renderObraView(); renderHist(); toast(t('ov.refreshed')); }
+function renderObraView(){
+  const obras=[...new Set(DB.map(r=>r.meta.obra).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const sel=document.getElementById('ov-obra');
+  if(sel){
+    if(ovFilter && !obras.includes(ovFilter)) ovFilter='';
+    sel.innerHTML=`<option value="">${t('ov.all')} (${DB.length})</option>`+
+      obras.map(o=>`<option value="${esc(o)}">${esc(o)} (${DB.filter(r=>r.meta.obra===o).length})</option>`).join('');
+    sel.value=ovFilter;
+  }
+  const cont=document.getElementById('ov-table'); if(!cont) return;
+  const rows=DB.filter(r=>!ovFilter||r.meta.obra===ovFilter)
+    .slice().sort((a,b)=> ((b.meta.pfim||b.meta.data||'')+'').localeCompare((a.meta.pfim||a.meta.data||'')+''));
+  if(!rows.length){ cont.innerHTML=`<div class="empty">${t('ov.empty')}</div>`; return; }
+  cont.innerHTML=`<table class="tbl ovt"><thead><tr>
+     <th>${t('ov.col.obra')}</th><th style="text-align:left">${t('ov.col.per')}</th><th style="text-align:left">${t('ov.col.autor')}</th>
+     <th>${t('ov.col.exec')}</th><th>${t('ov.col.desv')}</th><th style="text-align:center">${t('ov.col.feel')}</th>
+   </tr></thead><tbody>${rows.map(ovRow).join('')}</tbody></table>`;
+}
+function ovRow(r){
+  const p=r._payload||{}; const tn=p.tn||{};
+  const tot=num(tn.total),exec=num(tn.exec),cron=num(tn.cron);
+  const execPct=tot?exec/tot*100:NaN, desvio=exec-cron;
+  const feel=r.prazo?.feel||'';
+  const per=(r.meta.pini||r.meta.pfim)?`${r.meta.pini||'…'} → ${r.meta.pfim||'…'}`:(r.meta.data||'—');
+  const fLbl={ok:t('kf.ok'),warn:t('kf.warn'),risk:t('kf.risk')}[feel];
+  const chip=feel?`<span class="chip ${ {ok:'ok',warn:'warn',risk:'risk'}[feel] }" style="font-size:9px"><span class="dot"></span>${fLbl}</span>`:'—';
+  const dColor=desvio<0?'var(--risk)':desvio>0?'var(--ok)':'var(--muted)';
+  return `<tr class="ovrow ${r.id===editingId?'active':''}" onclick="loadRecord('${r.id}')" title="${t('ov.open')}">
+    <td style="text-align:left;font-family:var(--sans);color:var(--navy);font-weight:600">${esc(r.meta.obra||'—')}</td>
+    <td style="text-align:left;font-family:var(--mono);font-size:12px">${esc(per)}</td>
+    <td style="text-align:left;font-family:var(--sans);color:var(--muted)">${esc(r.meta.autor||'—')}</td>
+    <td>${isFinite(execPct)?fmtPct(execPct):'—'}</td>
+    <td style="color:${dColor}">${(tot||exec||cron)?((desvio>0?'+':'')+fmtMoneyShort(desvio)):'—'}</td>
+    <td style="text-align:center">${chip}</td>
+  </tr>`;
+}
 
 /* ============================ ui helpers ============================ */
 function toggleSec(h){ h.parentElement.classList.toggle('collapsed'); }
@@ -802,7 +927,7 @@ function applyLang(){
     if(!done) e.textContent=I18N[LANG][k];
   });
   document.querySelectorAll('[data-i18n-ph]').forEach(e=>{ const k=e.getAttribute('data-i18n-ph'); if(I18N[LANG][k]!==undefined) e.placeholder=I18N[LANG][k]; });
-  renderTC(); renderWK(); renderTM(); renderPE(); renderPA(); recalc(); renderHist();
+  renderTC(); renderWK(); renderTM(); renderPE(); renderPA(); recalc(); renderHist(); renderObraView();
 }
 
 /* ============================ boot ============================ */
@@ -812,7 +937,7 @@ function applyLang(){
   writeForm();
   recalc();
   DB=await loadDB();
-  renderHist();
+  renderHist(); renderObraView();
 })();
 </script>
 </body>
