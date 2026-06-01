@@ -193,7 +193,7 @@
 <div class="nav">
   <div class="brand">
     <div class="logo">V</div>
-    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.01.1009</small></div>
+    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.01.1019</small></div>
   </div>
   <div class="spacer"></div>
   <label class="nav-deploy" id="btn-deploy" title="Deploy para GitHub / Vercel">🚀 Deploy
@@ -204,7 +204,7 @@
     <button id="lang-en" onclick="setLang('en')">EN</button>
   </div>
   <span id="sb-dot" class="sb-dot" title="Supabase"></span>
-  <span class="badge-ver" id="ver-badge">v26.06.01.1009</span>
+  <span class="badge-ver" id="ver-badge">v26.06.01.1019</span>
 </div>
 
 <div class="wrap">
@@ -388,9 +388,10 @@
       <span class="chev">▾</span>
     </div>
     <div class="sec-body">
-      <div class="grid g2">
+      <div class="grid g3">
         <div class="field"><label class="lab" data-i18n="s4.concl">Prazo previsto para conclusão</label><input class="inp" type="date" id="pz-concl" oninput="recalc()"></div>
         <div class="field"><label class="lab" data-i18n="s4.baliz">Prazo do balizamento (contratual)</label><input class="inp" type="date" id="pz-baliz" oninput="recalc()"></div>
+        <div class="field"><label class="lab" data-i18n="s4.fisc">Prazo Fiscalização</label><input class="inp" type="date" id="pz-fisc" oninput="recalc()"></div>
       </div>
       <div class="field" style="margin-top:14px"><label class="lab" data-i18n="s4.feel">Feeling da Fiscalização</label>
         <div class="feel" id="feel">
@@ -497,7 +498,7 @@ const I18N={
   "s2.detail":"Pendentes — detalhe","s2.add.tcp":"Adicionar pendente","s2.empty":"Sem pendentes registados.",
   "tcp.id":"Id","tcp.data":"Data início","tcp.valor":"Valor (€)","tcp.desc":"Descrição","tcp.desc.ph":"Descrição do trabalho complementar pendente",
   "s3.h":"Valores Pagos & em Dívida","s3.pagos":"Valores pagos (€)","s3.divida":"Valores em dívida (€)","s3.nota":"Nota","s3.nota.ph":"Autos pendentes, retenções…",
-  "s4.h":"Prazos & Avaliação da Fiscalização","s4.concl":"Prazo previsto para conclusão","s4.baliz":"Prazo do balizamento (contratual)","s4.feel":"Feeling da Fiscalização",
+  "s4.h":"Prazos & Avaliação da Fiscalização","s4.concl":"Prazo previsto para conclusão","s4.baliz":"Prazo do balizamento (contratual)","s4.fisc":"Prazo Fiscalização","s4.feel":"Feeling da Fiscalização",
   "s4.feel.ok":"Favorável · no prazo","s4.feel.warn":"Atenção · em risco","s4.feel.risk":"Crítico · atrasado","s4.feelnota":"Fundamentação","s4.feelnota.ph":"Justificação do feeling, fatores de risco para o prazo…",
   "s5.h":"Trabalhos Previstos e em Curso","s5.sub":"Cruzamento Previsto × Em Curso para detetar frentes fora do plano","s5.add":"Adicionar frente de trabalho","s5.empty":"Sem frentes registadas.",
   "wk.desc":"Frente / descrição","wk.desc.ph":"Descrição da frente de trabalho","wk.prev":"Previsto","wk.curso":"Em curso",
@@ -532,7 +533,7 @@ const I18N={
   "s2.detail":"Pending — detail","s2.add.tcp":"Add pending item","s2.empty":"No pending items recorded.",
   "tcp.id":"Id","tcp.data":"Start date","tcp.valor":"Value (€)","tcp.desc":"Description","tcp.desc.ph":"Pending complementary work description",
   "s3.h":"Amounts Paid & Outstanding","s3.pagos":"Amounts paid (€)","s3.divida":"Amounts outstanding (€)","s3.nota":"Note","s3.nota.ph":"Pending invoices, retentions…",
-  "s4.h":"Deadlines & Supervision Assessment","s4.concl":"Forecast completion date","s4.baliz":"Baseline (contractual) date","s4.feel":"Supervision feeling",
+  "s4.h":"Deadlines & Supervision Assessment","s4.concl":"Forecast completion date","s4.baliz":"Baseline (contractual) date","s4.fisc":"Supervision deadline","s4.feel":"Supervision feeling",
   "s4.feel.ok":"Favourable · on schedule","s4.feel.warn":"Caution · at risk","s4.feel.risk":"Critical · delayed","s4.feelnota":"Rationale","s4.feelnota.ph":"Reasoning for the feeling, schedule risk factors…",
   "s5.h":"Planned & Ongoing Works","s5.sub":"Planned × Ongoing cross-check to surface off-plan fronts","s5.add":"Add work front","s5.empty":"No fronts recorded.",
   "wk.desc":"Front / description","wk.desc.ph":"Work front description","wk.prev":"Planned","wk.curso":"Ongoing",
@@ -554,7 +555,7 @@ const I18N={
  }
 };
 /* ============================ version (single source) ============================ */
-const APP_VER='v26.06.01.1009';
+const APP_VER='v26.06.01.1019';
 
 /* ============================ editor mode ============================ */
 function showEditor(){ document.body.classList.add('editing'); }
@@ -654,7 +655,7 @@ function blank(){
     tcAprov:'', tcPend:'',
     tcp:[],
     fin:{pagos:'',divida:'',nota:''},
-    prazo:{concl:'',baliz:'',feel:'',nota:''},
+    prazo:{concl:'',baliz:'',fisc:'',feel:'',nota:''},
     wk:[], tm:[], pe:[], pa:[],
     obs:''
   };
@@ -681,7 +682,7 @@ function readForm(){
   state.tcPend =val('tc-pend-val');
   state.fin={pagos:val('fin-pagos'),divida:val('fin-divida'),nota:val('fin-nota')};
   const f=document.querySelector('input[name=feel]:checked');
-  state.prazo={concl:val('pz-concl'),baliz:val('pz-baliz'),feel:f?f.value:'',nota:val('pz-nota')};
+  state.prazo={concl:val('pz-concl'),baliz:val('pz-baliz'),fisc:val('pz-fisc'),feel:f?f.value:'',nota:val('pz-nota')};
   state.obs=val('obs-gerais');
   /* dynamic lists are kept in state live via their oninput handlers */
 }
@@ -717,14 +718,14 @@ function writeForm(){
   });
   set('m-data',state.meta.data); set('m-obra',state.meta.obra); set('m-autor',state.meta.autor);
   set('m-ptipo',state.meta.ptipo||'semanal'); set('m-pini',state.meta.pini); set('m-pfim',state.meta.pfim);
-  // Migrate legacy v26.06.01.1009: totalNew (manual "Total Contratado (novo)") → total
+  // Migrate legacy v26.06.01.1019: totalNew (manual "Total Contratado (novo)") → total
   if(state.tn && state.tn.totalNew && !state.tn.total){ state.tn.total = state.tn.totalNew; }
   if(state.tn) delete state.tn.totalNew;
   set('tn-total',state.tn.total); set('tn-trab-ant',state.tn.trabAnt); set('tn-adm-dir',state.tn.admDir);
   set('tn-exec',state.tn.exec); set('tn-cron',state.tn.cron); set('tn-nota',state.tn.nota);
   set('tc-aprov-val',state.tcAprov); set('tc-pend-val',state.tcPend);
   set('fin-pagos',state.fin.pagos); set('fin-divida',state.fin.divida); set('fin-nota',state.fin.nota);
-  set('pz-concl',state.prazo.concl); set('pz-baliz',state.prazo.baliz); set('pz-nota',state.prazo.nota);
+  set('pz-concl',state.prazo.concl); set('pz-baliz',state.prazo.baliz); set('pz-fisc',state.prazo.fisc); set('pz-nota',state.prazo.nota);
   document.querySelectorAll('input[name=feel]').forEach(r=>r.checked=(r.value===state.prazo.feel));
   set('obs-gerais',state.obs);
   renderTCP(); renderWK(); renderTM(); renderPE(); renderPA();
