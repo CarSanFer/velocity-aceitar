@@ -109,12 +109,16 @@
   .row-item .rm{align-self:center}
   .row-tc{grid-template-columns:110px 130px 1fr 140px 36px}
   .row-tcp{grid-template-columns:100px 120px 140px 1fr 36px}
-  .row-wk{grid-template-columns:14px 1fr 140px 140px 36px;align-items:center}
-  .wk-stat{width:10px;height:10px;border-radius:50%;background:var(--muted-2);transition:background .15s;flex-shrink:0;justify-self:center}
-  .wk-stat[data-stat=ok]{background:var(--ok)}
-  .wk-stat[data-stat=warn]{background:var(--warn)}
-  .wk-stat[data-stat=risk]{background:var(--risk);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
-  .wk-check{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--muted);padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;font-weight:600;user-select:none;transition:.12s}
+  .row-wk{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px}
+  .row-wk .wk-stat{width:11px;height:11px;border-radius:50%;background:var(--muted-2);flex:none;transition:background .15s,box-shadow .15s}
+  .row-wk .wk-stat[data-stat=ok]{background:var(--ok);box-shadow:0 0 0 3px rgba(46,125,79,.15)}
+  .row-wk .wk-stat[data-stat=warn]{background:var(--warn);box-shadow:0 0 0 3px rgba(201,146,42,.15)}
+  .row-wk .wk-stat[data-stat=risk]{background:var(--risk);box-shadow:0 0 0 3px rgba(192,57,43,.20)}
+  .row-wk .wk-stat[data-stat=muted]{background:var(--muted-2)}
+  .row-wk .wk-desc-input{flex:1 1 260px;min-width:0}
+  .row-wk .wk-toggles{display:flex;gap:8px;flex:none;flex-wrap:wrap}
+  .row-wk .iconbtn{flex:none}
+  .wk-check{display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:var(--muted);padding:7px 11px;border:1px solid var(--line);border-radius:6px;background:#fff;font-weight:600;user-select:none;transition:.12s;white-space:nowrap}
   .wk-check:hover{border-color:var(--navy-2)}
   .wk-check input{margin:0;cursor:pointer;accent-color:var(--navy-2);width:14px;height:14px}
   .wk-check:has(input:checked){background:#eef4fb;border-color:var(--navy-2);color:var(--navy)}
@@ -123,7 +127,7 @@
   .row-pe{grid-template-columns:90px 110px 1fr 1fr 36px}
   .row-wk{grid-template-columns:1fr 150px 36px}
   .row-tm{grid-template-columns:110px 1fr 36px}
-  @media(max-width:820px){.row-tc,.row-tcp,.row-pe,.row-wk,.row-tm{grid-template-columns:1fr}}
+  @media(max-width:820px){.row-tc,.row-tcp,.row-pe,.row-tm{grid-template-columns:1fr}}
   .row-item .micro{font-size:9.5px;color:var(--muted-2);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;display:block}
   .iconbtn{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
   .iconbtn:hover{color:var(--risk);border-color:#f0cfca;background:var(--risk-bg)}
@@ -188,7 +192,7 @@
 <div class="nav">
   <div class="brand">
     <div class="logo">V</div>
-    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.01.0350</small></div>
+    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.01.0932</small></div>
   </div>
   <div class="spacer"></div>
   <label class="nav-deploy" id="btn-deploy" title="Deploy para GitHub / Vercel">🚀 Deploy
@@ -199,7 +203,7 @@
     <button id="lang-en" onclick="setLang('en')">EN</button>
   </div>
   <span id="sb-dot" class="sb-dot" title="Supabase"></span>
-  <span class="badge-ver" id="ver-badge">v26.06.01.0350</span>
+  <span class="badge-ver" id="ver-badge">v26.06.01.0932</span>
 </div>
 
 <div class="wrap">
@@ -289,7 +293,16 @@
           <th data-i18n="s1.col.rel">Relativo (%)</th>
         </tr></thead>
         <tbody>
-          <tr><td data-i18n="s1.total">Total contratado (TN)</td>
+          <tr><td data-i18n="s1.totalNew">Total Contratado (novo)</td>
+              <td><input class="inp money" type="text" inputmode="decimal" id="tn-total-new" oninput="recalc()"></td>
+              <td class="cellpct" id="tn-total-new-pct">—</td></tr>
+          <tr><td data-i18n="s1.trabAnt">Trabalhos Anteriores Efetuados</td>
+              <td><input class="inp money" type="text" inputmode="decimal" id="tn-trab-ant" oninput="recalc()"></td>
+              <td class="cellpct" id="tn-trab-ant-pct">—</td></tr>
+          <tr><td data-i18n="s1.admDir">Administração Direta</td>
+              <td><input class="inp money" type="text" inputmode="decimal" id="tn-adm-dir" oninput="recalc()"></td>
+              <td class="cellpct" id="tn-adm-dir-pct">—</td></tr>
+          <tr><td data-i18n="s1.total">Total Contratado</td>
               <td><input class="inp money" type="text" inputmode="decimal" id="tn-total" oninput="recalc()"></td>
               <td class="cellpct">100%</td></tr>
           <tr><td data-i18n="s1.exec">Executado até à data</td>
@@ -471,7 +484,8 @@ const I18N={
   "s0.h":"Identificação & Período","s0.data":"Data","s0.obra":"Obra","s0.obra.ph":"Designação / código da obra","s0.autor":"Autor","s0.autor.ph":"Nome do responsável",
   "s0.ptipo":"Periodicidade","s0.ptipo.w":"Semanal","s0.ptipo.b":"Quinzenal","s0.ptipo.m":"Mensal","s0.ptipo.o":"Outro","s0.pini":"Período — início","s0.pfim":"Período — fim",
   "s1.h":"Trabalhos Normais","s1.sub":"Execução vs. Cronograma Financeiro","s1.col.rub":"Rubrica","s1.col.abs":"Valor absoluto (€)","s1.col.rel":"Relativo (%)",
-  "s1.total":"Total contratado (TN)","s1.exec":"Executado até à data","s1.cron":"Previsto no Cronograma (até à data)","s1.desvio":"Desvio (Executado − Previsto)",
+  "s1.totalNew":"Total Contratado (novo)","s1.trabAnt":"Trabalhos Anteriores Efetuados","s1.admDir":"Administração Direta",
+  "s1.total":"Total Contratado","s1.exec":"Executado até à data","s1.cron":"Previsto no Cronograma (até à data)","s1.desvio":"Desvio (Executado − Previsto)",
   "s1.nota":"Nota de execução","s1.nota.ph":"Comentário sobre o ritmo de execução face ao previsto…",
   "s2.h":"Trabalhos Complementares","s2.sub":"Aprovados & pendentes · peso sobre TN contratado e executado",
   "s2.col.pct1":"% s/ TN contratado","s2.col.pct2":"% s/ TN executado",
@@ -490,7 +504,8 @@ const I18N={
   "s8.h":"Observações Gerais","s8.ph":"Notas finais, conclusões e recomendações do período…",
   "hist.h":"Histórico de períodos",
   "ov.title":"Relatórios por Obra","ov.sub":"Consultar e abrir períodos guardados","ov.filter":"Obra","ov.refresh":"Atualizar","ov.refreshed":"Lista atualizada",
-  "ov.all":"Todas as obras","ov.empty":"Sem relatórios guardados. Clica em + Novo período para criar o primeiro.","ov.open":"Abrir relatório",
+  "ov.all":"Todas as obras","ov.placeholder":"Selecione uma obra…","ov.pick":"Selecione uma obra na lista acima para ver os relatórios guardados.","ov.emptyObra":"Sem períodos guardados para esta obra.",
+  "ov.empty":"Sem relatórios guardados. Clica em + Novo período para criar o primeiro.","ov.open":"Abrir relatório em nova janela","ov.notfound":"Relatório não encontrado.",
   "ov.col.obra":"Obra","ov.col.per":"Período","ov.col.autor":"Autor","ov.col.exec":"Exec. TN","ov.col.desv":"Desvio","ov.col.feel":"Feeling","ov.col.upd":"Atualizado",
   "k.exec":"Execução TN","k.desvio":"Desvio","k.tcap":"TC aprovados","k.tcpor":"TC pendentes","k.divida":"Em dívida","k.feel":"Feeling","k.prazo":"dias p/ prazo",
   "kf.ok":"Favorável","kf.warn":"Atenção","kf.risk":"Crítico","kf.na":"—",
@@ -504,7 +519,8 @@ const I18N={
   "s0.h":"Identification & Period","s0.data":"Date","s0.obra":"Project","s0.obra.ph":"Project name / code","s0.autor":"Author","s0.autor.ph":"Responsible name",
   "s0.ptipo":"Frequency","s0.ptipo.w":"Weekly","s0.ptipo.b":"Biweekly","s0.ptipo.m":"Monthly","s0.ptipo.o":"Other","s0.pini":"Period — start","s0.pfim":"Period — end",
   "s1.h":"Normal Works","s1.sub":"Progress vs. Financial Schedule","s1.col.rub":"Item","s1.col.abs":"Absolute value (€)","s1.col.rel":"Relative (%)",
-  "s1.total":"Total contracted (NW)","s1.exec":"Executed to date","s1.cron":"Scheduled (to date)","s1.desvio":"Deviation (Executed − Planned)",
+  "s1.totalNew":"Contracted Total (new)","s1.trabAnt":"Previously Executed Works","s1.admDir":"Direct Administration",
+  "s1.total":"Contracted Total","s1.exec":"Executed to date","s1.cron":"Scheduled (to date)","s1.desvio":"Deviation (Executed − Planned)",
   "s1.nota":"Execution note","s1.nota.ph":"Comment on execution pace against plan…",
   "s2.h":"Complementary Works","s2.sub":"Approved & pending · share of contracted and executed NW",
   "s2.col.pct1":"% over NW contracted","s2.col.pct2":"% over NW executed",
@@ -523,7 +539,8 @@ const I18N={
   "s8.h":"General Remarks","s8.ph":"Final notes, conclusions and recommendations for the period…",
   "hist.h":"Period history",
   "ov.title":"Reports by Project","ov.sub":"Browse and open saved periods","ov.filter":"Project","ov.refresh":"Refresh","ov.refreshed":"List refreshed",
-  "ov.all":"All projects","ov.empty":"No saved reports yet. Click + New period to create the first one.","ov.open":"Open report",
+  "ov.all":"All projects","ov.placeholder":"Select a project…","ov.pick":"Select a project above to see its saved reports.","ov.emptyObra":"No saved periods for this project.",
+  "ov.empty":"No saved reports yet. Click + New period to create the first one.","ov.open":"Open report in new window","ov.notfound":"Report not found.",
   "ov.col.obra":"Project","ov.col.per":"Period","ov.col.autor":"Author","ov.col.exec":"NW exec.","ov.col.desv":"Deviation","ov.col.feel":"Feeling","ov.col.upd":"Updated",
   "k.exec":"NW progress","k.desvio":"Deviation","k.tcap":"CW approved","k.tcpor":"CW pending","k.divida":"Outstanding","k.feel":"Feeling","k.prazo":"days to deadline",
   "kf.ok":"Favourable","kf.warn":"Caution","kf.risk":"Critical","kf.na":"—",
@@ -533,23 +550,31 @@ const I18N={
  }
 };
 /* ============================ version (single source) ============================ */
-const APP_VER='v26.06.01.0350';
+const APP_VER='v26.06.01.0932';
 
 /* ============================ editor mode ============================ */
 function showEditor(){ document.body.classList.add('editing'); }
 function hideEditor(){ document.body.classList.remove('editing'); }
 
 /* ============================ money formatting ============================ */
-function parseNum(v){
+// toRaw: strip ONLY thousand separators (preserve locale decimal). Used on focus.
+function toRaw(v){
   if(v===''||v==null) return '';
-  let s=String(v).replace(/\s/g,'');
-  if(LANG==='pt'){ s=s.replace(/\./g,'').replace(',','.'); }   // pt-PT: dot=milhar, vírgula=decimal
-  else            { s=s.replace(/,/g,''); }                    // en-GB: vírgula=thousand, dot=decimal
+  let s=String(v).replace(/\s/g,'');           // strip spaces + NBSPs
+  if(LANG==='pt') s=s.replace(/\./g,'');       // PT: dots are thousand sep, comma stays
+  else            s=s.replace(/,/g,'');        // EN: commas are thousand sep, dot stays
   return s;
+}
+// toFloat: parse to JS number from any locale-formatted string.
+function toFloat(v){
+  if(v===''||v==null) return NaN;
+  let s=toRaw(v);
+  if(LANG==='pt') s=s.replace(',','.');        // PT decimal comma → dot
+  return parseFloat(s);
 }
 function fmtNumDisp(v){
   if(v===''||v==null) return '';
-  const n=parseFloat(parseNum(v));
+  const n=toFloat(v);
   if(!isFinite(n)) return String(v);
   return new Intl.NumberFormat(LANG==='pt'?'pt-PT':'en-GB',{maximumFractionDigits:2}).format(n);
 }
@@ -621,7 +646,7 @@ function blank(){
   return {
     id:null, createdAt:null, updatedAt:null,
     meta:{data:'',obra:'',autor:'',ptipo:'semanal',pini:'',pfim:''},
-    tn:{total:'',exec:'',cron:'',nota:''},
+    tn:{totalNew:'',trabAnt:'',admDir:'',total:'',exec:'',cron:'',nota:''},
     tcAprov:'', tcPend:'',
     tcp:[],
     fin:{pagos:'',divida:'',nota:''},
@@ -631,7 +656,7 @@ function blank(){
   };
 }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
-const num = v => { const n=parseFloat(parseNum(v)); return isNaN(n)?0:n; };
+const num = v => { const n=toFloat(v); return isNaN(n)?0:n; };
 
 /* ============================ formatting ============================ */
 function fmtMoney(v){
@@ -647,7 +672,7 @@ function fmtPct(v){ if(!isFinite(v)) return '—'; return new Intl.NumberFormat(
 /* ============================ form <-> state ============================ */
 function readForm(){
   state.meta={data:val('m-data'),obra:val('m-obra'),autor:val('m-autor'),ptipo:val('m-ptipo'),pini:val('m-pini'),pfim:val('m-pfim')};
-  state.tn={total:val('tn-total'),exec:val('tn-exec'),cron:val('tn-cron'),nota:val('tn-nota')};
+  state.tn={totalNew:val('tn-total-new'),trabAnt:val('tn-trab-ant'),admDir:val('tn-adm-dir'),total:val('tn-total'),exec:val('tn-exec'),cron:val('tn-cron'),nota:val('tn-nota')};
   state.tcAprov=val('tc-aprov-val');
   state.tcPend =val('tc-pend-val');
   state.fin={pagos:val('fin-pagos'),divida:val('fin-divida'),nota:val('fin-nota')};
@@ -688,6 +713,7 @@ function writeForm(){
   });
   set('m-data',state.meta.data); set('m-obra',state.meta.obra); set('m-autor',state.meta.autor);
   set('m-ptipo',state.meta.ptipo||'semanal'); set('m-pini',state.meta.pini); set('m-pfim',state.meta.pfim);
+  set('tn-total-new',state.tn.totalNew); set('tn-trab-ant',state.tn.trabAnt); set('tn-adm-dir',state.tn.admDir);
   set('tn-total',state.tn.total); set('tn-exec',state.tn.exec); set('tn-cron',state.tn.cron); set('tn-nota',state.tn.nota);
   set('tc-aprov-val',state.tcAprov); set('tc-pend-val',state.tcPend);
   set('fin-pagos',state.fin.pagos); set('fin-divida',state.fin.divida); set('fin-nota',state.fin.nota);
@@ -744,9 +770,11 @@ function renderWK(){
   c.innerHTML=state.wk.map((r,i)=>`
    <div class="row-item row-wk">
      <span class="wk-stat" data-stat="${wkStat(r)}"></span>
-     <div><span class="micro">${t('wk.desc')}</span><input class="inp" placeholder="${t('wk.desc.ph')}" value="${esc(r.desc)}" oninput="state.wk[${i}].desc=this.value"></div>
-     <label class="wk-check"><input type="checkbox" ${r.prev?'checked':''} onchange="state.wk[${i}].prev=this.checked;refreshWkUi()"><span>${t('wk.prev')}</span></label>
-     <label class="wk-check"><input type="checkbox" ${r.curso?'checked':''} onchange="state.wk[${i}].curso=this.checked;refreshWkUi()"><span>${t('wk.curso')}</span></label>
+     <input class="inp wk-desc-input" placeholder="${t('wk.desc.ph')}" value="${esc(r.desc)}" oninput="state.wk[${i}].desc=this.value">
+     <div class="wk-toggles">
+       <label class="wk-check"><input type="checkbox" ${r.prev?'checked':''} onchange="state.wk[${i}].prev=this.checked;refreshWkUi()"><span>${t('wk.prev')}</span></label>
+       <label class="wk-check"><input type="checkbox" ${r.curso?'checked':''} onchange="state.wk[${i}].curso=this.checked;refreshWkUi()"><span>${t('wk.curso')}</span></label>
+     </div>
      <button class="iconbtn rm" onclick="del('wk',${i})">✕</button>
    </div>`).join('');
   refreshWkUi();
@@ -779,13 +807,18 @@ const renderPA=()=>renderPend('pa');
 /* ============================ recalc / dashboard ============================ */
 function recalc(){
   readForm();
+  const totNew=num(state.tn.totalNew), trabAnt=num(state.tn.trabAnt), admDir=num(state.tn.admDir);
   const tot=num(state.tn.total), exec=num(state.tn.exec), cron=num(state.tn.cron);
   const execPct = tot? exec/tot*100 : NaN;
   const cronPct = tot? cron/tot*100 : NaN;
   const desvio = exec-cron;
   const desvioPct = tot? desvio/tot*100 : NaN;
-  document.getElementById('tn-exec-pct').textContent = isFinite(execPct)?fmtPct(execPct):'—';
-  document.getElementById('tn-cron-pct').textContent = isFinite(cronPct)?fmtPct(cronPct):'—';
+  const setPct=(id,pct)=>{ const e=document.getElementById(id); if(e) e.textContent=isFinite(pct)?fmtPct(pct):'—'; };
+  setPct('tn-total-new-pct', tot? totNew/tot*100  : NaN);
+  setPct('tn-trab-ant-pct',  tot? trabAnt/tot*100 : NaN);
+  setPct('tn-adm-dir-pct',   tot? admDir/tot*100  : NaN);
+  setPct('tn-exec-pct',  execPct);
+  setPct('tn-cron-pct',  cronPct);
   const dEl=document.getElementById('tn-desvio'); dEl.textContent=(tot||exec||cron)?fmtMoney(desvio):'—';
   dEl.style.color = desvio<0?'var(--risk)':desvio>0?'var(--ok)':'var(--navy)';
   const dpEl=document.getElementById('tn-desvio-pct'); dpEl.textContent=isFinite(desvioPct)?(desvio>0?'+':'')+fmtPct(desvioPct):'—';
@@ -873,7 +906,9 @@ function newReport(){
   readForm();
   if(dirty() && !confirm(t('confirm.new'))) return;
   state=blank(); editingId=null; set('m-data',new Date().toISOString().slice(0,10)); state.meta.data=val('m-data');
-  writeForm(); applyMoneyFormat(); recalc(); showEditor(); window.scrollTo({top:0,behavior:'smooth'}); renderHist(); toast(t('msg.new'));
+  writeForm(); applyMoneyFormat(); recalc(); showEditor(); window.scrollTo({top:0,behavior:'smooth'}); renderHist();
+  try{ history.replaceState({}, '', location.pathname); }catch(e){}
+  toast(t('msg.new'));
 }
 function cloneLast(){
   readForm();
@@ -903,7 +938,7 @@ async function deleteRecord(id,ev){
     renderHist(); renderObraView(); toast(t('msg.del'));
   }catch(e){ sbStatus('err'); toast('⚠ '+e.message); }
 }
-function dirty(){ return JSON.stringify(state)!==JSON.stringify(blank()) && (state.meta.obra||state.tn.total||state.tc.length||state.pe.length); }
+function dirty(){ return JSON.stringify(state)!==JSON.stringify(blank()) && !!(state.meta?.obra||state.tn?.total||state.tcp?.length||state.pe?.length); }
 
 function exportJSON(){
   readForm();
@@ -994,14 +1029,16 @@ function renderObraView(){
   const sel=document.getElementById('ov-obra');
   if(sel){
     if(ovFilter && !obras.includes(ovFilter)) ovFilter='';
-    sel.innerHTML=`<option value="">${t('ov.all')} (${DB.length})</option>`+
+    sel.innerHTML=`<option value="">${t('ov.placeholder')}</option>`+
       obras.map(o=>`<option value="${esc(o)}">${esc(o)} (${DB.filter(r=>r.meta.obra===o).length})</option>`).join('');
     sel.value=ovFilter;
   }
   const cont=document.getElementById('ov-table'); if(!cont) return;
-  const rows=DB.filter(r=>!ovFilter||r.meta.obra===ovFilter)
+  if(!DB.length){ cont.innerHTML=`<div class="empty">${t('ov.empty')}</div>`; return; }
+  if(!ovFilter){  cont.innerHTML=`<div class="empty">${t('ov.pick')}</div>`;  return; }
+  const rows=DB.filter(r=>r.meta.obra===ovFilter)
     .slice().sort((a,b)=> ((b.meta.pfim||b.meta.data||'')+'').localeCompare((a.meta.pfim||a.meta.data||'')+''));
-  if(!rows.length){ cont.innerHTML=`<div class="empty">${t('ov.empty')}</div>`; return; }
+  if(!rows.length){ cont.innerHTML=`<div class="empty">${t('ov.emptyObra')}</div>`; return; }
   cont.innerHTML=`<table class="tbl ovt"><thead><tr>
      <th>${t('ov.col.obra')}</th><th style="text-align:left">${t('ov.col.per')}</th><th style="text-align:left">${t('ov.col.autor')}</th>
      <th>${t('ov.col.exec')}</th><th>${t('ov.col.desv')}</th><th style="text-align:center">${t('ov.col.feel')}</th>
@@ -1016,7 +1053,7 @@ function ovRow(r){
   const fLbl={ok:t('kf.ok'),warn:t('kf.warn'),risk:t('kf.risk')}[feel];
   const chip=feel?`<span class="chip ${ {ok:'ok',warn:'warn',risk:'risk'}[feel] }" style="font-size:9px"><span class="dot"></span>${fLbl}</span>`:'—';
   const dColor=desvio<0?'var(--risk)':desvio>0?'var(--ok)':'var(--muted)';
-  return `<tr class="ovrow ${r.id===editingId?'active':''}" onclick="loadRecord('${r.id}')" title="${t('ov.open')}">
+  return `<tr class="ovrow ${r.id===editingId?'active':''}" onclick="openRecordInNewWindow('${r.id}')" title="${t('ov.open')}">
     <td style="text-align:left;font-family:var(--sans);color:var(--navy);font-weight:600">${esc(r.meta.obra||'—')}</td>
     <td style="text-align:left;font-family:var(--mono);font-size:12px">${esc(per)}</td>
     <td style="text-align:left;font-family:var(--sans);color:var(--muted)">${esc(r.meta.autor||'—')}</td>
@@ -1024,6 +1061,10 @@ function ovRow(r){
     <td style="color:${dColor}">${(tot||exec||cron)?((desvio>0?'+':'')+fmtMoneyShort(desvio)):'—'}</td>
     <td style="text-align:center">${chip}</td>
   </tr>`;
+}
+function openRecordInNewWindow(id){
+  const base=location.href.split('?')[0].split('#')[0];
+  window.open(base+'?id='+encodeURIComponent(id),'_blank');
 }
 
 /* ============================ ui helpers ============================ */
@@ -1059,7 +1100,7 @@ function applyLang(){
   document.getElementById('ver-line').textContent=APP_VER;
   // money input focus/blur formatting (delegated, capture phase since focus/blur don't bubble)
   document.addEventListener('focus', e=>{
-    if(e.target?.matches?.('.inp.money')) e.target.value=parseNum(e.target.value);
+    if(e.target?.matches?.('.inp.money')) e.target.value=toRaw(e.target.value);
   }, true);
   document.addEventListener('blur', e=>{
     if(e.target?.matches?.('.inp.money')){ e.target.value=fmtNumDisp(e.target.value); recalc(); }
@@ -1070,8 +1111,16 @@ function applyLang(){
   recalc();
   DB=await loadDB();
   renderHist(); renderObraView();
-  // boot: editor hidden; user opens via "Novo período" or by clicking a row
-  hideEditor();
+  // If URL has ?id=<recordId>, auto-open that record in the editor (new-window flow)
+  const urlId = new URLSearchParams(location.search).get('id');
+  if(urlId){
+    const rec=DB.find(r=>r.id===urlId);
+    if(rec) loadRecord(urlId);
+    else    toast(t('ov.notfound'));
+  } else {
+    // boot: editor hidden; user opens via "Novo período" or by clicking a row
+    hideEditor();
+  }
 })();
 </script>
 </body>
