@@ -193,7 +193,7 @@
 <div class="nav">
   <div class="brand">
     <div class="logo">V</div>
-    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.01.0952</small></div>
+    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.01.1009</small></div>
   </div>
   <div class="spacer"></div>
   <label class="nav-deploy" id="btn-deploy" title="Deploy para GitHub / Vercel">🚀 Deploy
@@ -204,7 +204,7 @@
     <button id="lang-en" onclick="setLang('en')">EN</button>
   </div>
   <span id="sb-dot" class="sb-dot" title="Supabase"></span>
-  <span class="badge-ver" id="ver-badge">v26.06.01.0952</span>
+  <span class="badge-ver" id="ver-badge">v26.06.01.1009</span>
 </div>
 
 <div class="wrap">
@@ -554,7 +554,7 @@ const I18N={
  }
 };
 /* ============================ version (single source) ============================ */
-const APP_VER='v26.06.01.0952';
+const APP_VER='v26.06.01.1009';
 
 /* ============================ editor mode ============================ */
 function showEditor(){ document.body.classList.add('editing'); }
@@ -580,7 +580,7 @@ function fmtNumDisp(v){
   if(v===''||v==null) return '';
   const n=toFloat(v);
   if(!isFinite(n)) return String(v);
-  return new Intl.NumberFormat(LANG==='pt'?'pt-PT':'en-GB',{maximumFractionDigits:2}).format(n);
+  return new Intl.NumberFormat(LANG==='pt'?'pt-PT':'en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
 }
 function applyMoneyFormat(){
   document.querySelectorAll('.inp.money').forEach(el=>{
@@ -664,7 +664,7 @@ const num = v => { const n=toFloat(v); return isNaN(n)?0:n; };
 
 /* ============================ formatting ============================ */
 function fmtMoney(v){
-  return new Intl.NumberFormat(LANG==='pt'?'pt-PT':'en-GB',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(v||0);
+  return new Intl.NumberFormat(LANG==='pt'?'pt-PT':'en-GB',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
 }
 function fmtMoneyShort(v){
   const a=Math.abs(v); let s;
@@ -717,7 +717,7 @@ function writeForm(){
   });
   set('m-data',state.meta.data); set('m-obra',state.meta.obra); set('m-autor',state.meta.autor);
   set('m-ptipo',state.meta.ptipo||'semanal'); set('m-pini',state.meta.pini); set('m-pfim',state.meta.pfim);
-  // Migrate legacy v26.06.01.0952: totalNew (manual "Total Contratado (novo)") → total
+  // Migrate legacy v26.06.01.1009: totalNew (manual "Total Contratado (novo)") → total
   if(state.tn && state.tn.totalNew && !state.tn.total){ state.tn.total = state.tn.totalNew; }
   if(state.tn) delete state.tn.totalNew;
   set('tn-total',state.tn.total); set('tn-trab-ant',state.tn.trabAnt); set('tn-adm-dir',state.tn.admDir);
