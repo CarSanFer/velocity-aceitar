@@ -108,10 +108,22 @@
   .row-item{display:grid;gap:8px;align-items:start;background:#fafbfc;border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:9px 10px}
   .row-item .rm{align-self:center}
   .row-tc{grid-template-columns:110px 130px 1fr 140px 36px}
+  .row-tcp{grid-template-columns:100px 120px 140px 1fr 36px}
+  .row-wk{grid-template-columns:14px 1fr 140px 140px 36px;align-items:center}
+  .wk-stat{width:10px;height:10px;border-radius:50%;background:var(--muted-2);transition:background .15s;flex-shrink:0;justify-self:center}
+  .wk-stat[data-stat=ok]{background:var(--ok)}
+  .wk-stat[data-stat=warn]{background:var(--warn)}
+  .wk-stat[data-stat=risk]{background:var(--risk);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
+  .wk-check{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--muted);padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;font-weight:600;user-select:none;transition:.12s}
+  .wk-check:hover{border-color:var(--navy-2)}
+  .wk-check input{margin:0;cursor:pointer;accent-color:var(--navy-2);width:14px;height:14px}
+  .wk-check:has(input:checked){background:#eef4fb;border-color:var(--navy-2);color:var(--navy)}
+  .wk-sum{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:11px;border-top:1px dashed var(--line);min-height:1px}
+  .wk-sum:empty{border-top:0;padding-top:0;margin-top:0}
   .row-pe{grid-template-columns:90px 110px 1fr 1fr 36px}
   .row-wk{grid-template-columns:1fr 150px 36px}
   .row-tm{grid-template-columns:110px 1fr 36px}
-  @media(max-width:820px){.row-tc,.row-pe,.row-wk,.row-tm{grid-template-columns:1fr}}
+  @media(max-width:820px){.row-tc,.row-tcp,.row-pe,.row-wk,.row-tm{grid-template-columns:1fr}}
   .row-item .micro{font-size:9.5px;color:var(--muted-2);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;display:block}
   .iconbtn{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
   .iconbtn:hover{color:var(--risk);border-color:#f0cfca;background:var(--risk-bg)}
@@ -148,6 +160,8 @@
 
   .meta-strip{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:12px;color:var(--muted);margin-top:6px}
   .ov-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  body:not(.editing) #editor{display:none}
+  body:not(.editing) .edit-only{display:none}
   .ovt tbody tr.ovrow{cursor:pointer;transition:.1s}
   .ovt tbody tr.ovrow:hover td{background:#f4f8fc}
   .ovt tbody tr.ovrow.active td{background:#fdf8ee}
@@ -174,7 +188,7 @@
 <div class="nav">
   <div class="brand">
     <div class="logo">V</div>
-    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.05.28.1559</small></div>
+    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.01.0350</small></div>
   </div>
   <div class="spacer"></div>
   <label class="nav-deploy" id="btn-deploy" title="Deploy para GitHub / Vercel">🚀 Deploy
@@ -185,7 +199,7 @@
     <button id="lang-en" onclick="setLang('en')">EN</button>
   </div>
   <span id="sb-dot" class="sb-dot" title="Supabase"></span>
-  <span class="badge-ver" id="ver-badge">v26.05.28.1559</span>
+  <span class="badge-ver" id="ver-badge">v26.06.01.0350</span>
 </div>
 
 <div class="wrap">
@@ -195,10 +209,10 @@
     <button class="btn btn-gold" onclick="newReport()">＋ <span data-i18n="tb.new">Novo período</span></button>
     <button class="btn btn-out" onclick="cloneLast()" data-i18n="tb.clone">Criar a partir do último</button>
     <div class="grow"></div>
-    <button class="btn btn-ghost btn-sm" onclick="exportJSON()" data-i18n="tb.export">Exportar JSON</button>
-    <button class="btn btn-ghost btn-sm" onclick="window.print()" data-i18n="tb.print">Imprimir / PDF</button>
+    <button class="btn btn-ghost btn-sm edit-only" onclick="exportJSON()" data-i18n="tb.export">Exportar JSON</button>
+    <button class="btn btn-ghost btn-sm edit-only" onclick="window.print()" data-i18n="tb.print">Imprimir / PDF</button>
     <button class="btn btn-out" onclick="openHist()">🗂 <span data-i18n="tb.hist">Histórico</span> (<span id="hist-count">0</span>)</button>
-    <button class="btn btn-navy" onclick="saveReport()" data-i18n="tb.save">Guardar</button>
+    <button class="btn btn-navy edit-only" onclick="saveReport()" data-i18n="tb.save">Guardar</button>
   </div>
 
   <!-- Vistas por Obra -->
@@ -219,6 +233,9 @@
       <div id="ov-table"></div>
     </div>
   </section>
+
+  <!-- Editor (KPIs + form sections) — only visible when editing -->
+  <div id="editor">
 
   <!-- Dashboard -->
   <div class="card">
@@ -273,13 +290,13 @@
         </tr></thead>
         <tbody>
           <tr><td data-i18n="s1.total">Total contratado (TN)</td>
-              <td><input class="inp money" type="number" step="0.01" id="tn-total" oninput="recalc()"></td>
+              <td><input class="inp money" type="text" inputmode="decimal" id="tn-total" oninput="recalc()"></td>
               <td class="cellpct">100%</td></tr>
           <tr><td data-i18n="s1.exec">Executado até à data</td>
-              <td><input class="inp money" type="number" step="0.01" id="tn-exec" oninput="recalc()"></td>
+              <td><input class="inp money" type="text" inputmode="decimal" id="tn-exec" oninput="recalc()"></td>
               <td class="cellpct" id="tn-exec-pct">—</td></tr>
           <tr><td data-i18n="s1.cron">Previsto no Cronograma (até à data)</td>
-              <td><input class="inp money" type="number" step="0.01" id="tn-cron" oninput="recalc()"></td>
+              <td><input class="inp money" type="text" inputmode="decimal" id="tn-cron" oninput="recalc()"></td>
               <td class="cellpct" id="tn-cron-pct">—</td></tr>
           <tr class="total"><td data-i18n="s1.desvio">Desvio (Executado − Previsto)</td>
               <td id="tn-desvio">—</td>
@@ -295,19 +312,38 @@
     <div class="sec-head" onclick="toggleSec(this)">
       <div class="n">2</div>
       <h2 data-i18n="s2.h">Trabalhos Complementares</h2>
-      <span class="sub" data-i18n="s2.sub">% sobre Trabalhos Normais · aprovados e por aprovar</span>
+      <span class="sub" data-i18n="s2.sub">Aprovados &amp; pendentes · peso sobre TN contratado e executado</span>
       <span class="chev">▾</span>
     </div>
     <div class="sec-body">
-      <div class="rows" id="tc-rows"></div>
-      <button class="btn btn-out btn-sm add-row" onclick="addTC()">＋ <span data-i18n="s2.add">Adicionar trabalho complementar</span></button>
-      <div class="sumline">
-        <div class="it" data-i18n="s2.sum.aprov">Aprovados<b id="tc-aprov">—</b></div>
-        <div class="it" data-i18n="s2.sum.aprovp">% sobre TN<b id="tc-aprov-pct">—</b></div>
-        <div class="it" data-i18n="s2.sum.por">Por aprovar / decidir<b id="tc-por">—</b></div>
-        <div class="it" data-i18n="s2.sum.porp">% sobre TN<b id="tc-por-pct">—</b></div>
-        <div class="it" data-i18n="s2.sum.tot">Total TC<b id="tc-tot">—</b></div>
-      </div>
+      <table class="tbl">
+        <thead><tr>
+          <th data-i18n="s1.col.rub">Rubrica</th>
+          <th data-i18n="s1.col.abs">Valor absoluto (€)</th>
+          <th data-i18n="s2.col.pct1">% s/ TN contratado</th>
+          <th data-i18n="s2.col.pct2">% s/ TN executado</th>
+        </tr></thead>
+        <tbody>
+          <tr><td data-i18n="s2.aprov">Aprovados</td>
+              <td><input class="inp money" type="text" inputmode="decimal" id="tc-aprov-val" oninput="recalc()"></td>
+              <td class="cellpct" id="tc-aprov-pct-tot">—</td>
+              <td class="cellpct" id="tc-aprov-pct-exec">—</td></tr>
+          <tr><td data-i18n="s2.pend">Pendentes</td>
+              <td><input class="inp money" type="text" inputmode="decimal" id="tc-pend-val" oninput="recalc()"></td>
+              <td class="cellpct" id="tc-pend-pct-tot">—</td>
+              <td class="cellpct">—</td></tr>
+          <tr class="total">
+            <td data-i18n="s2.total">Total TC</td>
+            <td id="tc-total-val">—</td>
+            <td id="tc-total-pct-tot">—</td>
+            <td id="tc-total-pct-exec">—</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <label class="lab" style="margin:18px 0 8px;display:block" data-i18n="s2.detail">Pendentes — detalhe</label>
+      <div class="rows" id="tcp-rows"></div>
+      <button class="btn btn-out btn-sm add-row" onclick="addTcp()">＋ <span data-i18n="s2.add.tcp">Adicionar pendente</span></button>
     </div>
   </section>
 
@@ -320,8 +356,8 @@
     </div>
     <div class="sec-body">
       <div class="grid g3">
-        <div class="field"><label class="lab" data-i18n="s3.pagos">Valores pagos (€)</label><input class="inp money" type="number" step="0.01" id="fin-pagos" oninput="recalc()"></div>
-        <div class="field"><label class="lab" data-i18n="s3.divida">Valores em dívida (€)</label><input class="inp money" type="number" step="0.01" id="fin-divida" oninput="recalc()"></div>
+        <div class="field"><label class="lab" data-i18n="s3.pagos">Valores pagos (€)</label><input class="inp money" type="text" inputmode="decimal" id="fin-pagos" oninput="recalc()"></div>
+        <div class="field"><label class="lab" data-i18n="s3.divida">Valores em dívida (€)</label><input class="inp money" type="text" inputmode="decimal" id="fin-divida" oninput="recalc()"></div>
         <div class="field"><label class="lab" data-i18n="s3.nota">Nota</label><input class="inp" id="fin-nota" data-i18n-ph="s3.nota.ph" placeholder="Autos pendentes, retenções…"></div>
       </div>
     </div>
@@ -355,11 +391,13 @@
     <div class="sec-head" onclick="toggleSec(this)">
       <div class="n">5</div>
       <h2 data-i18n="s5.h">Trabalhos Previstos e em Curso</h2>
+      <span class="sub" data-i18n="s5.sub">Cruzamento Previsto × Em Curso para detetar frentes fora do plano</span>
       <span class="chev">▾</span>
     </div>
     <div class="sec-body">
       <div class="rows" id="wk-rows"></div>
       <button class="btn btn-out btn-sm add-row" onclick="addWK()">＋ <span data-i18n="s5.add">Adicionar frente de trabalho</span></button>
+      <div class="wk-sum" id="wk-summary"></div>
     </div>
   </section>
 
@@ -407,6 +445,8 @@
     </div>
   </section>
 
+  </div><!-- /#editor -->
+
 </div>
 
 <!-- History -->
@@ -433,22 +473,26 @@ const I18N={
   "s1.h":"Trabalhos Normais","s1.sub":"Execução vs. Cronograma Financeiro","s1.col.rub":"Rubrica","s1.col.abs":"Valor absoluto (€)","s1.col.rel":"Relativo (%)",
   "s1.total":"Total contratado (TN)","s1.exec":"Executado até à data","s1.cron":"Previsto no Cronograma (até à data)","s1.desvio":"Desvio (Executado − Previsto)",
   "s1.nota":"Nota de execução","s1.nota.ph":"Comentário sobre o ritmo de execução face ao previsto…",
-  "s2.h":"Trabalhos Complementares","s2.sub":"% sobre Trabalhos Normais · aprovados e por aprovar","s2.add":"Adicionar trabalho complementar",
-  "s2.sum.aprov":"Aprovados","s2.sum.aprovp":"% sobre TN","s2.sum.por":"Por aprovar / decidir","s2.sum.porp":"% sobre TN","s2.sum.tot":"Total TC",
-  "tc.data":"Data","tc.valor":"Valor (€)","tc.desc":"Descrição","tc.estado":"Estado","tc.e.aprov":"Aprovado","tc.e.por":"Por aprovar","tc.e.dec":"Em decisão","tc.desc.ph":"Descrição do trabalho complementar",
+  "s2.h":"Trabalhos Complementares","s2.sub":"Aprovados & pendentes · peso sobre TN contratado e executado",
+  "s2.col.pct1":"% s/ TN contratado","s2.col.pct2":"% s/ TN executado",
+  "s2.aprov":"Aprovados","s2.pend":"Pendentes","s2.total":"Total TC",
+  "s2.detail":"Pendentes — detalhe","s2.add.tcp":"Adicionar pendente","s2.empty":"Sem pendentes registados.",
+  "tcp.id":"Id","tcp.data":"Data início","tcp.valor":"Valor (€)","tcp.desc":"Descrição","tcp.desc.ph":"Descrição do trabalho complementar pendente",
   "s3.h":"Valores Pagos & em Dívida","s3.pagos":"Valores pagos (€)","s3.divida":"Valores em dívida (€)","s3.nota":"Nota","s3.nota.ph":"Autos pendentes, retenções…",
   "s4.h":"Prazos & Avaliação da Fiscalização","s4.concl":"Prazo previsto para conclusão","s4.baliz":"Prazo do balizamento (contratual)","s4.feel":"Feeling da Fiscalização",
   "s4.feel.ok":"Favorável · no prazo","s4.feel.warn":"Atenção · em risco","s4.feel.risk":"Crítico · atrasado","s4.feelnota":"Fundamentação","s4.feelnota.ph":"Justificação do feeling, fatores de risco para o prazo…",
-  "s5.h":"Trabalhos Previstos e em Curso","s5.add":"Adicionar frente de trabalho","wk.desc":"Frente / descrição","wk.estado":"Estado","wk.e.prev":"Previsto","wk.e.curso":"Em curso","wk.e.concl":"Concluído","wk.desc.ph":"Descrição da frente de trabalho",
+  "s5.h":"Trabalhos Previstos e em Curso","s5.sub":"Cruzamento Previsto × Em Curso para detetar frentes fora do plano","s5.add":"Adicionar frente de trabalho","s5.empty":"Sem frentes registadas.",
+  "wk.desc":"Frente / descrição","wk.desc.ph":"Descrição da frente de trabalho","wk.prev":"Previsto","wk.curso":"Em curso",
+  "wk.stat.ok":"No plano","wk.stat.warn":"Por iniciar","wk.stat.risk":"Fora do plano","wk.stat.none":"—",
   "s6.h":"Temas Efetuados pela Fiscalização","s6.add":"Adicionar tema","tm.data":"Data","tm.desc":"Tema / ação","tm.desc.ph":"Descrição do tema tratado pela Fiscalização",
   "s7.h":"Situações Pendentes","s7.sub":"Pedidos de Esclarecimento & Pedidos de Aprovação","s7.pe":"Pedidos de Esclarecimento (PE)","s7.pe.add":"Adicionar pedido de esclarecimento","s7.pa":"Pedidos de Aprovação (PA)","s7.pa.add":"Adicionar pedido de aprovação",
   "pe.id":"Id","pe.data":"Data","pe.desc":"Descrição","pe.motivo":"Motivo","pe.desc.ph":"Descrição","pe.motivo.ph":"Motivo / estado",
   "s8.h":"Observações Gerais","s8.ph":"Notas finais, conclusões e recomendações do período…",
   "hist.h":"Histórico de períodos",
   "ov.title":"Relatórios por Obra","ov.sub":"Consultar e abrir períodos guardados","ov.filter":"Obra","ov.refresh":"Atualizar","ov.refreshed":"Lista atualizada",
-  "ov.all":"Todas as obras","ov.empty":"Sem relatórios guardados. Preenche um período e carrega em Guardar.","ov.open":"Abrir relatório",
+  "ov.all":"Todas as obras","ov.empty":"Sem relatórios guardados. Clica em + Novo período para criar o primeiro.","ov.open":"Abrir relatório",
   "ov.col.obra":"Obra","ov.col.per":"Período","ov.col.autor":"Autor","ov.col.exec":"Exec. TN","ov.col.desv":"Desvio","ov.col.feel":"Feeling","ov.col.upd":"Atualizado",
-  "k.exec":"Execução TN","k.desvio":"Desvio","k.tcap":"TC aprovados","k.tcpor":"TC por aprovar","k.divida":"Em dívida","k.feel":"Feeling","k.prazo":"dias p/ prazo",
+  "k.exec":"Execução TN","k.desvio":"Desvio","k.tcap":"TC aprovados","k.tcpor":"TC pendentes","k.divida":"Em dívida","k.feel":"Feeling","k.prazo":"dias p/ prazo",
   "kf.ok":"Favorável","kf.warn":"Atenção","kf.risk":"Crítico","kf.na":"—",
   "msg.saved":"Período guardado","msg.del":"Período eliminado","msg.need":"Indique Data e Obra antes de guardar","msg.cloned":"Criado a partir do último — atualize a Data e o Período","msg.nolast":"Não existe período anterior para esta obra","msg.new":"Novo período em branco","msg.loaded":"Período carregado","msg.exp":"JSON exportado",
   "hist.empty":"Sem períodos guardados.","hist.load":"Abrir","hist.del":"Eliminar","confirm.del":"Eliminar este período do histórico?","confirm.new":"Descartar alterações não guardadas e começar um novo período?",
@@ -462,20 +506,24 @@ const I18N={
   "s1.h":"Normal Works","s1.sub":"Progress vs. Financial Schedule","s1.col.rub":"Item","s1.col.abs":"Absolute value (€)","s1.col.rel":"Relative (%)",
   "s1.total":"Total contracted (NW)","s1.exec":"Executed to date","s1.cron":"Scheduled (to date)","s1.desvio":"Deviation (Executed − Planned)",
   "s1.nota":"Execution note","s1.nota.ph":"Comment on execution pace against plan…",
-  "s2.h":"Complementary Works","s2.sub":"% over Normal Works · approved and pending","s2.add":"Add complementary work",
-  "s2.sum.aprov":"Approved","s2.sum.aprovp":"% over NW","s2.sum.por":"Pending / to decide","s2.sum.porp":"% over NW","s2.sum.tot":"Total CW",
-  "tc.data":"Date","tc.valor":"Value (€)","tc.desc":"Description","tc.estado":"Status","tc.e.aprov":"Approved","tc.e.por":"Pending","tc.e.dec":"Under decision","tc.desc.ph":"Complementary work description",
+  "s2.h":"Complementary Works","s2.sub":"Approved & pending · share of contracted and executed NW",
+  "s2.col.pct1":"% over NW contracted","s2.col.pct2":"% over NW executed",
+  "s2.aprov":"Approved","s2.pend":"Pending","s2.total":"Total CW",
+  "s2.detail":"Pending — detail","s2.add.tcp":"Add pending item","s2.empty":"No pending items recorded.",
+  "tcp.id":"Id","tcp.data":"Start date","tcp.valor":"Value (€)","tcp.desc":"Description","tcp.desc.ph":"Pending complementary work description",
   "s3.h":"Amounts Paid & Outstanding","s3.pagos":"Amounts paid (€)","s3.divida":"Amounts outstanding (€)","s3.nota":"Note","s3.nota.ph":"Pending invoices, retentions…",
   "s4.h":"Deadlines & Supervision Assessment","s4.concl":"Forecast completion date","s4.baliz":"Baseline (contractual) date","s4.feel":"Supervision feeling",
   "s4.feel.ok":"Favourable · on schedule","s4.feel.warn":"Caution · at risk","s4.feel.risk":"Critical · delayed","s4.feelnota":"Rationale","s4.feelnota.ph":"Reasoning for the feeling, schedule risk factors…",
-  "s5.h":"Planned & Ongoing Works","s5.add":"Add work front","wk.desc":"Front / description","wk.estado":"Status","wk.e.prev":"Planned","wk.e.curso":"Ongoing","wk.e.concl":"Completed","wk.desc.ph":"Work front description",
+  "s5.h":"Planned & Ongoing Works","s5.sub":"Planned × Ongoing cross-check to surface off-plan fronts","s5.add":"Add work front","s5.empty":"No fronts recorded.",
+  "wk.desc":"Front / description","wk.desc.ph":"Work front description","wk.prev":"Planned","wk.curso":"Ongoing",
+  "wk.stat.ok":"On plan","wk.stat.warn":"Not started","wk.stat.risk":"Off-plan","wk.stat.none":"—",
   "s6.h":"Topics Handled by Supervision","s6.add":"Add topic","tm.data":"Date","tm.desc":"Topic / action","tm.desc.ph":"Description of the topic handled by Supervision",
   "s7.h":"Pending Items","s7.sub":"Requests for Information & Approval Requests","s7.pe":"Requests for Information (RFI)","s7.pe.add":"Add request for information","s7.pa":"Approval Requests (AR)","s7.pa.add":"Add approval request",
   "pe.id":"Id","pe.data":"Date","pe.desc":"Description","pe.motivo":"Reason","pe.desc.ph":"Description","pe.motivo.ph":"Reason / status",
   "s8.h":"General Remarks","s8.ph":"Final notes, conclusions and recommendations for the period…",
   "hist.h":"Period history",
   "ov.title":"Reports by Project","ov.sub":"Browse and open saved periods","ov.filter":"Project","ov.refresh":"Refresh","ov.refreshed":"List refreshed",
-  "ov.all":"All projects","ov.empty":"No saved reports yet. Fill a period and press Save.","ov.open":"Open report",
+  "ov.all":"All projects","ov.empty":"No saved reports yet. Click + New period to create the first one.","ov.open":"Open report",
   "ov.col.obra":"Project","ov.col.per":"Period","ov.col.autor":"Author","ov.col.exec":"NW exec.","ov.col.desv":"Deviation","ov.col.feel":"Feeling","ov.col.upd":"Updated",
   "k.exec":"NW progress","k.desvio":"Deviation","k.tcap":"CW approved","k.tcpor":"CW pending","k.divida":"Outstanding","k.feel":"Feeling","k.prazo":"days to deadline",
   "kf.ok":"Favourable","kf.warn":"Caution","kf.risk":"Critical","kf.na":"—",
@@ -485,7 +533,32 @@ const I18N={
  }
 };
 /* ============================ version (single source) ============================ */
-const APP_VER='v26.05.28.1559';
+const APP_VER='v26.06.01.0350';
+
+/* ============================ editor mode ============================ */
+function showEditor(){ document.body.classList.add('editing'); }
+function hideEditor(){ document.body.classList.remove('editing'); }
+
+/* ============================ money formatting ============================ */
+function parseNum(v){
+  if(v===''||v==null) return '';
+  let s=String(v).replace(/\s/g,'');
+  if(LANG==='pt'){ s=s.replace(/\./g,'').replace(',','.'); }   // pt-PT: dot=milhar, vírgula=decimal
+  else            { s=s.replace(/,/g,''); }                    // en-GB: vírgula=thousand, dot=decimal
+  return s;
+}
+function fmtNumDisp(v){
+  if(v===''||v==null) return '';
+  const n=parseFloat(parseNum(v));
+  if(!isFinite(n)) return String(v);
+  return new Intl.NumberFormat(LANG==='pt'?'pt-PT':'en-GB',{maximumFractionDigits:2}).format(n);
+}
+function applyMoneyFormat(){
+  document.querySelectorAll('.inp.money').forEach(el=>{
+    if(document.activeElement===el) return;
+    el.value = el.value===''?'':fmtNumDisp(el.value);
+  });
+}
 
 let LANG = (localStorage_safe('get','ace_fisc_lang')) || 'pt';
 const t = k => (I18N[LANG][k] ?? k);
@@ -549,7 +622,8 @@ function blank(){
     id:null, createdAt:null, updatedAt:null,
     meta:{data:'',obra:'',autor:'',ptipo:'semanal',pini:'',pfim:''},
     tn:{total:'',exec:'',cron:'',nota:''},
-    tc:[],
+    tcAprov:'', tcPend:'',
+    tcp:[],
     fin:{pagos:'',divida:'',nota:''},
     prazo:{concl:'',baliz:'',feel:'',nota:''},
     wk:[], tm:[], pe:[], pa:[],
@@ -557,7 +631,7 @@ function blank(){
   };
 }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
-const num = v => { const n=parseFloat(v); return isNaN(n)?0:n; };
+const num = v => { const n=parseFloat(parseNum(v)); return isNaN(n)?0:n; };
 
 /* ============================ formatting ============================ */
 function fmtMoney(v){
@@ -574,6 +648,8 @@ function fmtPct(v){ if(!isFinite(v)) return '—'; return new Intl.NumberFormat(
 function readForm(){
   state.meta={data:val('m-data'),obra:val('m-obra'),autor:val('m-autor'),ptipo:val('m-ptipo'),pini:val('m-pini'),pfim:val('m-pfim')};
   state.tn={total:val('tn-total'),exec:val('tn-exec'),cron:val('tn-cron'),nota:val('tn-nota')};
+  state.tcAprov=val('tc-aprov-val');
+  state.tcPend =val('tc-pend-val');
   state.fin={pagos:val('fin-pagos'),divida:val('fin-divida'),nota:val('fin-nota')};
   const f=document.querySelector('input[name=feel]:checked');
   state.prazo={concl:val('pz-concl'),baliz:val('pz-baliz'),feel:f?f.value:'',nota:val('pz-nota')};
@@ -581,59 +657,99 @@ function readForm(){
   /* dynamic lists are kept in state live via their oninput handlers */
 }
 function writeForm(){
+  // Legacy migration: old tc array → new tcAprov sum + tcp pending list
+  if(Array.isArray(state.tc) && state.tc.length){
+    const old=state.tc, pv=v=>parseFloat(String(v||'').replace(/\s/g,'').replace(',','.'))||0;
+    const sumAp=old.filter(x=>x.estado==='aprov').reduce((s,x)=>s+pv(x.valor),0);
+    const pendList=old.filter(x=>x.estado!=='aprov').map((x,i)=>({
+      id:`TCP-${String(i+1).padStart(2,'0')}`, data:x.data||'', valor:String(x.valor||''), desc:x.desc||''
+    }));
+    if(!state.tcAprov && sumAp) state.tcAprov=String(sumAp);
+    if((!Array.isArray(state.tcp)||!state.tcp.length) && pendList.length) state.tcp=pendList;
+  }
+  delete state.tc;
+  // Normalize against blank() so missing keys never crash
+  const def=blank();
+  state={...def,...state,
+    meta: {...def.meta, ...(state.meta||{})},
+    tn:   {...def.tn,   ...(state.tn||{})},
+    fin:  {...def.fin,  ...(state.fin||{})},
+    prazo:{...def.prazo,...(state.prazo||{})}};
+  ['tcp','wk','tm','pe','pa'].forEach(k=>{ if(!Array.isArray(state[k])) state[k]=[]; });
+  // Legacy migration: wk items with old `estado` → new {prev,curso} flags
+  state.wk = state.wk.map(r=>{
+    if(r && typeof r==='object' && 'estado' in r && !('prev' in r) && !('curso' in r)){
+      const e=r.estado;
+      const prev = e==='prev'||e==='curso'||e==='concl';   // any old value implies it was on the radar
+      const curso= e==='curso';                            // only "curso" maps to ongoing
+      return {desc:r.desc||'', prev, curso};
+    }
+    return {desc:r?.desc||'', prev:!!r?.prev, curso:!!r?.curso};
+  });
   set('m-data',state.meta.data); set('m-obra',state.meta.obra); set('m-autor',state.meta.autor);
   set('m-ptipo',state.meta.ptipo||'semanal'); set('m-pini',state.meta.pini); set('m-pfim',state.meta.pfim);
   set('tn-total',state.tn.total); set('tn-exec',state.tn.exec); set('tn-cron',state.tn.cron); set('tn-nota',state.tn.nota);
+  set('tc-aprov-val',state.tcAprov); set('tc-pend-val',state.tcPend);
   set('fin-pagos',state.fin.pagos); set('fin-divida',state.fin.divida); set('fin-nota',state.fin.nota);
   set('pz-concl',state.prazo.concl); set('pz-baliz',state.prazo.baliz); set('pz-nota',state.prazo.nota);
   document.querySelectorAll('input[name=feel]').forEach(r=>r.checked=(r.value===state.prazo.feel));
   set('obs-gerais',state.obs);
-  renderTC(); renderWK(); renderTM(); renderPE(); renderPA();
+  renderTCP(); renderWK(); renderTM(); renderPE(); renderPA();
 }
 const val = id => (document.getElementById(id)?.value ?? '');
 const set = (id,v)=>{ const e=document.getElementById(id); if(e) e.value=(v??''); };
 
 /* ============================ dynamic lists ============================ */
-function addTC(){ state.tc.push({data:'',valor:'',desc:'',estado:'por'}); renderTC(); recalc(); }
-function addWK(){ state.wk.push({desc:'',estado:'curso'}); renderWK(); }
+function addTcp(){ state.tcp.push({id:nextId('tcp'),data:'',valor:'',desc:''}); renderTCP(); recalc(); }
+function addWK(){ state.wk.push({desc:'',prev:true,curso:false}); renderWK(); }
 function addTM(){ state.tm.push({data:'',desc:''}); renderTM(); }
 function addPE(){ state.pe.push({id:nextId('pe'),data:'',desc:'',motivo:''}); renderPE(); }
 function addPA(){ state.pa.push({id:nextId('pa'),data:'',desc:'',motivo:''}); renderPA(); }
-function nextId(kind){ const pref=kind==='pe'?'PE':'PA'; const arr=state[kind]; return pref+'-'+String(arr.length+1).padStart(2,'0'); }
-function del(kind,i){ state[kind].splice(i,1); ({tc:renderTC,wk:renderWK,tm:renderTM,pe:renderPE,pa:renderPA})[kind](); recalc(); }
+function nextId(kind){ const pref={pe:'PE',pa:'PA',tcp:'TCP'}[kind]||kind.toUpperCase(); const arr=state[kind]||[]; return pref+'-'+String(arr.length+1).padStart(2,'0'); }
+function del(kind,i){ state[kind].splice(i,1); ({tcp:renderTCP,wk:renderWK,tm:renderTM,pe:renderPE,pa:renderPA})[kind](); recalc(); }
 const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-function renderTC(){
-  const c=document.getElementById('tc-rows');
-  if(!state.tc.length){ c.innerHTML=`<div class="empty">—</div>`; return; }
-  c.innerHTML=state.tc.map((r,i)=>`
-   <div class="row-item row-tc">
-     <div><span class="micro">${t('tc.data')}</span><input class="inp" type="date" value="${esc(r.data)}" oninput="state.tc[${i}].data=this.value"></div>
-     <div><span class="micro">${t('tc.valor')}</span><input class="inp money" type="number" step="0.01" value="${esc(r.valor)}" oninput="state.tc[${i}].valor=this.value;recalc()"></div>
-     <div><span class="micro">${t('tc.desc')}</span><input class="inp" placeholder="${t('tc.desc.ph')}" value="${esc(r.desc)}" oninput="state.tc[${i}].desc=this.value"></div>
-     <div><span class="micro">${t('tc.estado')}</span>
-       <select class="inp" oninput="state.tc[${i}].estado=this.value;recalc()" onchange="state.tc[${i}].estado=this.value;recalc()">
-         <option value="aprov" ${r.estado==='aprov'?'selected':''}>${t('tc.e.aprov')}</option>
-         <option value="por" ${r.estado==='por'?'selected':''}>${t('tc.e.por')}</option>
-         <option value="dec" ${r.estado==='dec'?'selected':''}>${t('tc.e.dec')}</option>
-       </select></div>
-     <button class="iconbtn rm" title="${t('hist.del')}" onclick="del('tc',${i})">✕</button>
+function renderTCP(){
+  const c=document.getElementById('tcp-rows'); if(!c) return;
+  if(!state.tcp.length){ c.innerHTML=`<div class="empty">${t('s2.empty')}</div>`; return; }
+  c.innerHTML=state.tcp.map((r,i)=>`
+   <div class="row-item row-tcp">
+     <div><span class="micro">${t('tcp.id')}</span><input class="inp" value="${esc(r.id)}" oninput="state.tcp[${i}].id=this.value"></div>
+     <div><span class="micro">${t('tcp.data')}</span><input class="inp" type="date" value="${esc(r.data)}" oninput="state.tcp[${i}].data=this.value"></div>
+     <div><span class="micro">${t('tcp.valor')}</span><input class="inp money" type="text" inputmode="decimal" value="${esc(r.valor)}" oninput="state.tcp[${i}].valor=this.value;recalc()"></div>
+     <div><span class="micro">${t('tcp.desc')}</span><input class="inp" placeholder="${t('tcp.desc.ph')}" value="${esc(r.desc)}" oninput="state.tcp[${i}].desc=this.value"></div>
+     <button class="iconbtn rm" title="${t('hist.del')}" onclick="del('tcp',${i})">✕</button>
    </div>`).join('');
 }
+function wkStat(r){ return r.prev&&r.curso?'ok':r.prev?'warn':r.curso?'risk':'muted'; }
+function refreshWkUi(){
+  const items=state.wk||[];
+  const tipMap={ok:t('wk.stat.ok'),warn:t('wk.stat.warn'),risk:t('wk.stat.risk'),muted:t('wk.stat.none')};
+  document.querySelectorAll('#wk-rows .wk-stat').forEach((dot,i)=>{
+    const s=wkStat(items[i]||{}); dot.dataset.stat=s; dot.title=tipMap[s];
+  });
+  const ok=items.filter(r=>r.prev&&r.curso).length;
+  const warn=items.filter(r=>r.prev&&!r.curso).length;
+  const risk=items.filter(r=>!r.prev&&r.curso).length;
+  const sum=document.getElementById('wk-summary'); if(!sum) return;
+  sum.innerHTML = items.length ? [
+    `<span class="chip ok"><span class="dot"></span>${ok} · ${t('wk.stat.ok')}</span>`,
+    `<span class="chip warn"><span class="dot"></span>${warn} · ${t('wk.stat.warn')}</span>`,
+    (risk?`<span class="chip risk"><span class="dot"></span>${risk} · ${t('wk.stat.risk')}</span>`:'')
+  ].join('') : '';
+}
 function renderWK(){
-  const c=document.getElementById('wk-rows');
-  if(!state.wk.length){ c.innerHTML=`<div class="empty">—</div>`; return; }
+  const c=document.getElementById('wk-rows'); if(!c) return;
+  if(!state.wk.length){ c.innerHTML=`<div class="empty">${t('s5.empty')}</div>`; refreshWkUi(); return; }
   c.innerHTML=state.wk.map((r,i)=>`
    <div class="row-item row-wk">
+     <span class="wk-stat" data-stat="${wkStat(r)}"></span>
      <div><span class="micro">${t('wk.desc')}</span><input class="inp" placeholder="${t('wk.desc.ph')}" value="${esc(r.desc)}" oninput="state.wk[${i}].desc=this.value"></div>
-     <div><span class="micro">${t('wk.estado')}</span>
-       <select class="inp" onchange="state.wk[${i}].estado=this.value">
-         <option value="prev" ${r.estado==='prev'?'selected':''}>${t('wk.e.prev')}</option>
-         <option value="curso" ${r.estado==='curso'?'selected':''}>${t('wk.e.curso')}</option>
-         <option value="concl" ${r.estado==='concl'?'selected':''}>${t('wk.e.concl')}</option>
-       </select></div>
+     <label class="wk-check"><input type="checkbox" ${r.prev?'checked':''} onchange="state.wk[${i}].prev=this.checked;refreshWkUi()"><span>${t('wk.prev')}</span></label>
+     <label class="wk-check"><input type="checkbox" ${r.curso?'checked':''} onchange="state.wk[${i}].curso=this.checked;refreshWkUi()"><span>${t('wk.curso')}</span></label>
      <button class="iconbtn rm" onclick="del('wk',${i})">✕</button>
    </div>`).join('');
+  refreshWkUi();
 }
 function renderTM(){
   const c=document.getElementById('tm-rows');
@@ -675,15 +791,17 @@ function recalc(){
   const dpEl=document.getElementById('tn-desvio-pct'); dpEl.textContent=isFinite(desvioPct)?(desvio>0?'+':'')+fmtPct(desvioPct):'—';
   dpEl.style.color=dEl.style.color;
 
-  // TC
-  let aprov=0,por=0;
-  state.tc.forEach(r=>{ const v=num(r.valor); if(r.estado==='aprov') aprov+=v; else por+=v; });
-  const tcTot=aprov+por;
-  document.getElementById('tc-aprov').textContent=fmtMoney(aprov);
-  document.getElementById('tc-por').textContent=fmtMoney(por);
-  document.getElementById('tc-tot').textContent=fmtMoney(tcTot);
-  document.getElementById('tc-aprov-pct').textContent=tot?fmtPct(aprov/tot*100):'—';
-  document.getElementById('tc-por-pct').textContent=tot?fmtPct(por/tot*100):'—';
+  // TC — manual totals + two weights (over TN contracted and over TN executed)
+  const aprov = num(state.tcAprov);
+  const por   = num(state.tcPend);
+  const tcTot = aprov+por;
+  const tcSet = (id,pct)=>{ const e=document.getElementById(id); if(e) e.textContent=isFinite(pct)?fmtPct(pct):'—'; };
+  tcSet('tc-aprov-pct-tot',  tot ? aprov/tot*100  : NaN);
+  tcSet('tc-aprov-pct-exec', exec? aprov/exec*100 : NaN);
+  tcSet('tc-pend-pct-tot',   tot ? por/tot*100    : NaN);
+  const tvEl=document.getElementById('tc-total-val'); if(tvEl) tvEl.textContent=(aprov||por)?fmtMoney(tcTot):'—';
+  tcSet('tc-total-pct-tot',  tot ? tcTot/tot*100  : NaN);
+  tcSet('tc-total-pct-exec', exec? tcTot/exec*100 : NaN);
 
   const divida=num(state.fin.divida);
   const feel=state.prazo.feel;
@@ -747,6 +865,7 @@ async function saveReport(){
     await SB.upsert(row);
     DB=await loadDB();
     renderHist(); renderObraView();
+    hideEditor(); window.scrollTo({top:0,behavior:'smooth'});
     toast(t('msg.saved'));
   }catch(e){ sbStatus('err'); toast('⚠ '+e.message); }
 }
@@ -754,7 +873,7 @@ function newReport(){
   readForm();
   if(dirty() && !confirm(t('confirm.new'))) return;
   state=blank(); editingId=null; set('m-data',new Date().toISOString().slice(0,10)); state.meta.data=val('m-data');
-  writeForm(); recalc(); window.scrollTo({top:0,behavior:'smooth'}); renderHist(); toast(t('msg.new'));
+  writeForm(); applyMoneyFormat(); recalc(); showEditor(); window.scrollTo({top:0,behavior:'smooth'}); renderHist(); toast(t('msg.new'));
 }
 function cloneLast(){
   readForm();
@@ -767,11 +886,11 @@ function cloneLast(){
   state.id=null; state.createdAt=null; state.updatedAt=null; editingId=null;
   // clear what changes each period
   state.meta.data=''; state.meta.pini=''; state.meta.pfim=''; state.obs='';
-  writeForm(); recalc(); window.scrollTo({top:0,behavior:'smooth'}); openSec('sec-meta'); renderHist(); toast(t('msg.cloned'));
+  writeForm(); applyMoneyFormat(); recalc(); showEditor(); window.scrollTo({top:0,behavior:'smooth'}); openSec('sec-meta'); renderHist(); toast(t('msg.cloned'));
 }
 function loadRecord(id){
   const r=DB.find(x=>x.id===id); if(!r) return;
-  state=structuredClone(r._payload||blank()); editingId=id; writeForm(); recalc(); renderHist(); renderObraView(); closeHist(); window.scrollTo({top:0,behavior:'smooth'}); toast(t('msg.loaded'));
+  state=structuredClone(r._payload||blank()); editingId=id; writeForm(); applyMoneyFormat(); recalc(); renderHist(); renderObraView(); closeHist(); showEditor(); window.scrollTo({top:0,behavior:'smooth'}); toast(t('msg.loaded'));
 }
 async function deleteRecord(id,ev){
   ev?.stopPropagation();
@@ -931,19 +1050,28 @@ function applyLang(){
     if(!done) e.textContent=I18N[LANG][k];
   });
   document.querySelectorAll('[data-i18n-ph]').forEach(e=>{ const k=e.getAttribute('data-i18n-ph'); if(I18N[LANG][k]!==undefined) e.placeholder=I18N[LANG][k]; });
-  renderTC(); renderWK(); renderTM(); renderPE(); renderPA(); recalc(); renderHist(); renderObraView();
+  renderTCP(); renderWK(); renderTM(); renderPE(); renderPA(); recalc(); renderHist(); renderObraView(); applyMoneyFormat();
 }
 
 /* ============================ boot ============================ */
 (async function init(){
   document.getElementById('ver-badge').textContent=APP_VER;
   document.getElementById('ver-line').textContent=APP_VER;
+  // money input focus/blur formatting (delegated, capture phase since focus/blur don't bubble)
+  document.addEventListener('focus', e=>{
+    if(e.target?.matches?.('.inp.money')) e.target.value=parseNum(e.target.value);
+  }, true);
+  document.addEventListener('blur', e=>{
+    if(e.target?.matches?.('.inp.money')){ e.target.value=fmtNumDisp(e.target.value); recalc(); }
+  }, true);
   set('m-data',new Date().toISOString().slice(0,10)); state.meta.data=val('m-data');
   setLang(LANG);
   writeForm();
   recalc();
   DB=await loadDB();
   renderHist(); renderObraView();
+  // boot: editor hidden; user opens via "Novo período" or by clicking a row
+  hideEditor();
 })();
 </script>
 </body>
