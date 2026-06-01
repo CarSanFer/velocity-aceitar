@@ -193,7 +193,7 @@
 <div class="nav">
   <div class="brand">
     <div class="logo">V</div>
-    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.01.1019</small></div>
+    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.01.1253</small></div>
   </div>
   <div class="spacer"></div>
   <label class="nav-deploy" id="btn-deploy" title="Deploy para GitHub / Vercel">🚀 Deploy
@@ -204,7 +204,7 @@
     <button id="lang-en" onclick="setLang('en')">EN</button>
   </div>
   <span id="sb-dot" class="sb-dot" title="Supabase"></span>
-  <span class="badge-ver" id="ver-badge">v26.06.01.1019</span>
+  <span class="badge-ver" id="ver-badge">v26.06.01.1253</span>
 </div>
 
 <div class="wrap">
@@ -303,9 +303,15 @@
           <tr><td data-i18n="s1.admDir">Administração Direta</td>
               <td><input class="inp money" type="text" inputmode="decimal" id="tn-adm-dir" oninput="recalc()"></td>
               <td class="cellpct" id="tn-adm-dir-pct">—</td></tr>
-          <tr class="total"><td data-i18n="s1.recontr">Total Recontratado</td>
-              <td id="tn-recontr">—</td>
-              <td class="cellpct" id="tn-recontr-pct">—</td></tr>
+          <tr class="total"><td data-i18n="s1.aberto">Total Em Aberto</td>
+              <td id="tn-em-aberto">—</td>
+              <td class="cellpct" id="tn-em-aberto-pct">—</td></tr>
+          <tr><td data-i18n="s1.custoExtra">Custo Extra</td>
+              <td id="tn-custo-extra">—</td>
+              <td class="cellpct" id="tn-custo-extra-pct">—</td></tr>
+          <tr><td data-i18n="s1.novoContr">Total Novo Contrato</td>
+              <td><input class="inp money" type="text" inputmode="decimal" id="tn-novo-contr" oninput="recalc()"></td>
+              <td class="cellpct" id="tn-novo-contr-pct">—</td></tr>
           <tr><td data-i18n="s1.tn">Trabalhos Normais</td>
               <td><input class="inp money" type="text" inputmode="decimal" id="tn-exec" oninput="recalc()"></td>
               <td class="cellpct" id="tn-exec-pct">—</td></tr>
@@ -489,7 +495,7 @@ const I18N={
   "s0.h":"Identificação & Período","s0.data":"Data","s0.obra":"Obra","s0.obra.ph":"Designação / código da obra","s0.autor":"Autor","s0.autor.ph":"Nome do responsável",
   "s0.ptipo":"Periodicidade","s0.ptipo.w":"Semanal","s0.ptipo.b":"Quinzenal","s0.ptipo.m":"Mensal","s0.ptipo.o":"Outro","s0.pini":"Período — início","s0.pfim":"Período — fim",
   "s1.h":"Trabalhos Normais","s1.sub":"Execução vs. Cronograma Financeiro","s1.col.rub":"Rubrica","s1.col.abs":"Valor absoluto (€)","s1.col.rel":"Relativo (%)",
-  "s1.total":"Total Contratado","s1.trabAnt":"Trabalhos Anteriores Efetuados","s1.admDir":"Administração Direta","s1.recontr":"Total Recontratado",
+  "s1.total":"Total Contratado","s1.trabAnt":"Trabalhos Anteriores Efetuados","s1.admDir":"Administração Direta","s1.aberto":"Total Em Aberto","s1.custoExtra":"Custo Extra","s1.novoContr":"Total Novo Contrato",
   "s1.tn":"Trabalhos Normais","s1.falta":"Falta Executar","s1.cron":"Previsto no Cronograma (até à data)","s1.desvio":"Desvio (Trab. Normais − Cronograma)",
   "s1.nota":"Nota de execução","s1.nota.ph":"Comentário sobre o ritmo de execução face ao previsto…",
   "s2.h":"Trabalhos Complementares","s2.sub":"Aprovados & pendentes · peso sobre TN contratado e executado",
@@ -524,7 +530,7 @@ const I18N={
   "s0.h":"Identification & Period","s0.data":"Date","s0.obra":"Project","s0.obra.ph":"Project name / code","s0.autor":"Author","s0.autor.ph":"Responsible name",
   "s0.ptipo":"Frequency","s0.ptipo.w":"Weekly","s0.ptipo.b":"Biweekly","s0.ptipo.m":"Monthly","s0.ptipo.o":"Other","s0.pini":"Period — start","s0.pfim":"Period — end",
   "s1.h":"Normal Works","s1.sub":"Progress vs. Financial Schedule","s1.col.rub":"Item","s1.col.abs":"Absolute value (€)","s1.col.rel":"Relative (%)",
-  "s1.total":"Contracted Total","s1.trabAnt":"Previously Executed Works","s1.admDir":"Direct Administration","s1.recontr":"Recontracted Total",
+  "s1.total":"Contracted Total","s1.trabAnt":"Previously Executed Works","s1.admDir":"Direct Administration","s1.aberto":"Open Total","s1.custoExtra":"Extra Cost","s1.novoContr":"New Contract Total",
   "s1.tn":"Normal Works","s1.falta":"To Be Executed","s1.cron":"Scheduled (to date)","s1.desvio":"Deviation (NW − Scheduled)",
   "s1.nota":"Execution note","s1.nota.ph":"Comment on execution pace against plan…",
   "s2.h":"Complementary Works","s2.sub":"Approved & pending · share of contracted and executed NW",
@@ -555,7 +561,7 @@ const I18N={
  }
 };
 /* ============================ version (single source) ============================ */
-const APP_VER='v26.06.01.1019';
+const APP_VER='v26.06.01.1253';
 
 /* ============================ editor mode ============================ */
 function showEditor(){ document.body.classList.add('editing'); }
@@ -651,7 +657,7 @@ function blank(){
   return {
     id:null, createdAt:null, updatedAt:null,
     meta:{data:'',obra:'',autor:'',ptipo:'semanal',pini:'',pfim:''},
-    tn:{total:'',trabAnt:'',admDir:'',exec:'',cron:'',nota:''},
+    tn:{total:'',trabAnt:'',admDir:'',novoContr:'',exec:'',cron:'',nota:''},
     tcAprov:'', tcPend:'',
     tcp:[],
     fin:{pagos:'',divida:'',nota:''},
@@ -677,7 +683,7 @@ function fmtPct(v){ if(!isFinite(v)) return '—'; return new Intl.NumberFormat(
 /* ============================ form <-> state ============================ */
 function readForm(){
   state.meta={data:val('m-data'),obra:val('m-obra'),autor:val('m-autor'),ptipo:val('m-ptipo'),pini:val('m-pini'),pfim:val('m-pfim')};
-  state.tn={total:val('tn-total'),trabAnt:val('tn-trab-ant'),admDir:val('tn-adm-dir'),exec:val('tn-exec'),cron:val('tn-cron'),nota:val('tn-nota')};
+  state.tn={total:val('tn-total'),trabAnt:val('tn-trab-ant'),admDir:val('tn-adm-dir'),novoContr:val('tn-novo-contr'),exec:val('tn-exec'),cron:val('tn-cron'),nota:val('tn-nota')};
   state.tcAprov=val('tc-aprov-val');
   state.tcPend =val('tc-pend-val');
   state.fin={pagos:val('fin-pagos'),divida:val('fin-divida'),nota:val('fin-nota')};
@@ -718,10 +724,10 @@ function writeForm(){
   });
   set('m-data',state.meta.data); set('m-obra',state.meta.obra); set('m-autor',state.meta.autor);
   set('m-ptipo',state.meta.ptipo||'semanal'); set('m-pini',state.meta.pini); set('m-pfim',state.meta.pfim);
-  // Migrate legacy v26.06.01.1019: totalNew (manual "Total Contratado (novo)") → total
+  // Migrate legacy v26.06.01.1253: totalNew (manual "Total Contratado (novo)") → total
   if(state.tn && state.tn.totalNew && !state.tn.total){ state.tn.total = state.tn.totalNew; }
   if(state.tn) delete state.tn.totalNew;
-  set('tn-total',state.tn.total); set('tn-trab-ant',state.tn.trabAnt); set('tn-adm-dir',state.tn.admDir);
+  set('tn-total',state.tn.total); set('tn-trab-ant',state.tn.trabAnt); set('tn-adm-dir',state.tn.admDir); set('tn-novo-contr',state.tn.novoContr);
   set('tn-exec',state.tn.exec); set('tn-cron',state.tn.cron); set('tn-nota',state.tn.nota);
   set('tc-aprov-val',state.tcAprov); set('tc-pend-val',state.tcPend);
   set('fin-pagos',state.fin.pagos); set('fin-divida',state.fin.divida); set('fin-nota',state.fin.nota);
@@ -816,26 +822,37 @@ const renderPA=()=>renderPend('pa');
 function recalc(){
   readForm();
   const tot=num(state.tn.total), trabAnt=num(state.tn.trabAnt), admDir=num(state.tn.admDir);
-  const recontr = tot - trabAnt - admDir;
+  const emAberto = tot - trabAnt - admDir;
+  const novoContr = num(state.tn.novoContr);
+  const custoExtra = emAberto - novoContr;
   const exec=num(state.tn.exec), cron=num(state.tn.cron);
-  const falta = recontr - exec;
+  const falta = emAberto - exec;
   const desvio = exec - cron;
   // % over Total Contratado (gross) for the breakdown rows
   const setPct=(id,pct)=>{ const e=document.getElementById(id); if(e) e.textContent=isFinite(pct)?fmtPct(pct):'—'; };
   setPct('tn-trab-ant-pct', tot? trabAnt/tot*100 : NaN);
   setPct('tn-adm-dir-pct',  tot? admDir/tot*100  : NaN);
-  // Total Recontratado (computed) and its weight in Total Contratado
-  const rEl=document.getElementById('tn-recontr'); if(rEl) rEl.textContent=(tot||trabAnt||admDir)?fmtMoney(recontr):'—';
-  setPct('tn-recontr-pct', tot? recontr/tot*100 : NaN);
-  // % over Total Recontratado for execution rows
-  const execPct = recontr? exec/recontr*100 : NaN;
-  const cronPct = recontr? cron/recontr*100 : NaN;
-  const faltaPct= recontr? falta/recontr*100: NaN;
-  const desvioPct=recontr? desvio/recontr*100:NaN;
+  // Total Em Aberto (computed) and its weight in Total Contratado
+  const rEl=document.getElementById('tn-em-aberto'); if(rEl) rEl.textContent=(tot||trabAnt||admDir)?fmtMoney(emAberto):'—';
+  setPct('tn-em-aberto-pct', tot? emAberto/tot*100 : NaN);
+  // Custo Extra (= Em Aberto − Novo Contrato): only shown when Novo Contrato is set; % over Em Aberto
+  const ceEl=document.getElementById('tn-custo-extra');
+  if(ceEl){
+    ceEl.textContent = novoContr ? fmtMoney(custoExtra) : '—';
+    ceEl.style.color = !novoContr ? '' : custoExtra<0 ? 'var(--risk)' : custoExtra>0 ? 'var(--ok)' : 'var(--navy)';
+  }
+  setPct('tn-custo-extra-pct', (novoContr && emAberto) ? custoExtra/emAberto*100 : NaN);
+  // Novo Contrato weight over Em Aberto
+  setPct('tn-novo-contr-pct', (novoContr && emAberto) ? novoContr/emAberto*100 : NaN);
+  // % over Em Aberto for execution rows
+  const execPct = emAberto? exec/emAberto*100 : NaN;
+  const cronPct = emAberto? cron/emAberto*100 : NaN;
+  const faltaPct= emAberto? falta/emAberto*100: NaN;
+  const desvioPct=emAberto? desvio/emAberto*100:NaN;
   setPct('tn-exec-pct',  execPct);
   setPct('tn-cron-pct',  cronPct);
   setPct('tn-falta-pct', faltaPct);
-  const fEl=document.getElementById('tn-falta'); if(fEl){ fEl.textContent=(recontr||exec)?fmtMoney(falta):'—'; fEl.style.color=falta<0?'var(--risk)':''; }
+  const fEl=document.getElementById('tn-falta'); if(fEl){ fEl.textContent=(emAberto||exec)?fmtMoney(falta):'—'; fEl.style.color=falta<0?'var(--risk)':''; }
   const dEl=document.getElementById('tn-desvio'); dEl.textContent=(exec||cron)?fmtMoney(desvio):'—';
   dEl.style.color = desvio<0?'var(--risk)':desvio>0?'var(--ok)':'var(--navy)';
   const dpEl=document.getElementById('tn-desvio-pct'); dpEl.textContent=isFinite(desvioPct)?(desvio>0?'+':'')+fmtPct(desvioPct):'—';
