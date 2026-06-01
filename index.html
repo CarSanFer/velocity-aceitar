@@ -193,7 +193,7 @@
 <div class="nav">
   <div class="brand">
     <div class="logo">V</div>
-    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.01.1347</small></div>
+    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.01.1353</small></div>
   </div>
   <div class="spacer"></div>
   <label class="nav-deploy" id="btn-deploy" title="Deploy para GitHub / Vercel">🚀 Deploy
@@ -204,7 +204,7 @@
     <button id="lang-en" onclick="setLang('en')">EN</button>
   </div>
   <span id="sb-dot" class="sb-dot" title="Supabase"></span>
-  <span class="badge-ver" id="ver-badge">v26.06.01.1347</span>
+  <span class="badge-ver" id="ver-badge">v26.06.01.1353</span>
 </div>
 
 <div class="wrap">
@@ -561,7 +561,7 @@ const I18N={
  }
 };
 /* ============================ version (single source) ============================ */
-const APP_VER='v26.06.01.1347';
+const APP_VER='v26.06.01.1353';
 
 /* ============================ editor mode ============================ */
 function showEditor(){ document.body.classList.add('editing'); }
@@ -724,7 +724,7 @@ function writeForm(){
   });
   set('m-data',state.meta.data); set('m-obra',state.meta.obra); set('m-autor',state.meta.autor);
   set('m-ptipo',state.meta.ptipo||'semanal'); set('m-pini',state.meta.pini); set('m-pfim',state.meta.pfim);
-  // Migrate legacy v26.06.01.1347: totalNew (manual "Total Contratado (novo)") → total
+  // Migrate legacy v26.06.01.1353: totalNew (manual "Total Contratado (novo)") → total
   if(state.tn && state.tn.totalNew && !state.tn.total){ state.tn.total = state.tn.totalNew; }
   if(state.tn) delete state.tn.totalNew;
   set('tn-total',state.tn.total); set('tn-trab-ant',state.tn.trabAnt); set('tn-adm-dir',state.tn.admDir); set('tn-novo-contr',state.tn.novoContr);
@@ -826,7 +826,8 @@ function recalc(){
   const novoContr = num(state.tn.novoContr);
   const custoExtra = novoContr - emAberto;
   const exec=num(state.tn.exec), cron=num(state.tn.cron);
-  const falta = emAberto - exec;
+  const execRef = novoContr || emAberto;       // referência da execução: Novo Contrato se houver, senão Em Aberto
+  const falta = execRef - exec;
   const desvio = exec - cron;
   // % over Total Contratado (gross) for the breakdown rows
   const setPct=(id,pct)=>{ const e=document.getElementById(id); if(e) e.textContent=isFinite(pct)?fmtPct(pct):'—'; };
@@ -835,7 +836,7 @@ function recalc(){
   // Total Em Aberto (computed) and its weight in Total Contratado
   const rEl=document.getElementById('tn-em-aberto'); if(rEl) rEl.textContent=(tot||trabAnt||admDir)?fmtMoney(emAberto):'—';
   setPct('tn-em-aberto-pct', tot? emAberto/tot*100 : NaN);
-  // Custo Extra (= Em Aberto − Novo Contrato): only shown when Novo Contrato is set; % over Em Aberto
+  // Custo Extra (= Novo Contrato − Em Aberto): only when Novo Contrato is set; % over Em Aberto
   const ceEl=document.getElementById('tn-custo-extra');
   if(ceEl){
     ceEl.textContent = novoContr ? fmtMoney(custoExtra) : '—';
@@ -844,15 +845,15 @@ function recalc(){
   setPct('tn-custo-extra-pct', (novoContr && emAberto) ? custoExtra/emAberto*100 : NaN);
   // Novo Contrato weight over Em Aberto
   setPct('tn-novo-contr-pct', (novoContr && emAberto) ? novoContr/emAberto*100 : NaN);
-  // % over Em Aberto for execution rows
-  const execPct = emAberto? exec/emAberto*100 : NaN;
-  const cronPct = emAberto? cron/emAberto*100 : NaN;
-  const faltaPct= emAberto? falta/emAberto*100: NaN;
-  const desvioPct=emAberto? desvio/emAberto*100:NaN;
+  // % over execRef for execution rows
+  const execPct = execRef? exec/execRef*100   : NaN;
+  const cronPct = execRef? cron/execRef*100   : NaN;
+  const faltaPct= execRef? falta/execRef*100  : NaN;
+  const desvioPct=execRef? desvio/execRef*100 : NaN;
   setPct('tn-exec-pct',  execPct);
   setPct('tn-cron-pct',  cronPct);
   setPct('tn-falta-pct', faltaPct);
-  const fEl=document.getElementById('tn-falta'); if(fEl){ fEl.textContent=(emAberto||exec)?fmtMoney(falta):'—'; fEl.style.color=falta<0?'var(--risk)':''; }
+  const fEl=document.getElementById('tn-falta'); if(fEl){ fEl.textContent=(execRef||exec)?fmtMoney(falta):'—'; fEl.style.color=falta<0?'var(--risk)':''; }
   const dEl=document.getElementById('tn-desvio'); dEl.textContent=(exec||cron)?fmtMoney(desvio):'—';
   dEl.style.color = desvio<0?'var(--risk)':desvio>0?'var(--ok)':'var(--navy)';
   const dpEl=document.getElementById('tn-desvio-pct'); dpEl.textContent=isFinite(desvioPct)?(desvio>0?'+':'')+fmtPct(desvioPct):'—';
