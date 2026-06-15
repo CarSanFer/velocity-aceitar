@@ -167,6 +167,19 @@
   body:not(.editing) #editor{display:none}
   body:not(.editing) .edit-only{display:none}
   body.editing #sec-ov{display:none}
+  /* Read-only mode in EN: hide mutation buttons, gray out inputs */
+  body.lang-en .btn-gold,
+  body.lang-en .btn-navy,
+  body.lang-en .btn-danger,
+  body.lang-en .add-row,
+  body.lang-en .delx,
+  body.lang-en .clone-btn { display:none !important; }
+  body.lang-en input[readonly],
+  body.lang-en textarea[readonly],
+  body.lang-en select[disabled],
+  body.lang-en input:disabled { background:#fafbfc !important; color:#555; cursor:default; border-color:#e3e6ec !important; }
+  body.lang-en .ro-banner { display:flex; align-items:center; gap:8px; padding:8px 14px; margin:0 0 12px; background:#fff7e6; border:1px solid #f5c97a; border-radius:8px; font-size:12px; color:#7a5a0f; }
+  body.lang-pt .ro-banner { display:none; }
   .ovt tbody tr.ovrow{cursor:pointer;transition:.1s}
   .ovt tbody tr.ovrow:hover td{background:#f4f8fc}
   .ovt tbody tr.ovrow.active td{background:#fdf8ee}
@@ -193,7 +206,7 @@
 <div class="nav">
   <div class="brand">
     <div class="logo">V</div>
-    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.01.1353</small></div>
+    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.09.1523</small></div>
   </div>
   <div class="spacer"></div>
   <label class="nav-deploy" id="btn-deploy" title="Deploy para GitHub / Vercel">🚀 Deploy
@@ -204,7 +217,7 @@
     <button id="lang-en" onclick="setLang('en')">EN</button>
   </div>
   <span id="sb-dot" class="sb-dot" title="Supabase"></span>
-  <span class="badge-ver" id="ver-badge">v26.06.01.1353</span>
+  <span class="badge-ver" id="ver-badge">v26.06.09.1523</span>
 </div>
 
 <div class="wrap">
@@ -212,7 +225,7 @@
   <!-- Toolbar -->
   <div class="toolbar">
     <button class="btn btn-gold" onclick="newReport()">＋ <span data-i18n="tb.new">Novo período</span></button>
-    <button class="btn btn-out" onclick="cloneLast()" data-i18n="tb.clone">Criar a partir do último</button>
+    <button class="btn btn-out clone-btn" onclick="cloneLast()" data-i18n="tb.clone">Criar a partir do último</button>
     <div class="grow"></div>
     <button class="btn btn-ghost btn-sm edit-only" onclick="exportJSON()" data-i18n="tb.export">Exportar JSON</button>
     <button class="btn btn-ghost btn-sm edit-only" onclick="window.print()" data-i18n="tb.print">Imprimir / PDF</button>
@@ -241,6 +254,7 @@
 
   <!-- Editor (KPIs + form sections) — only visible when editing -->
   <div id="editor">
+    <div class="ro-banner" data-i18n="ro.banner">Read-only mode — switch to PT to edit. Content is auto-translated.</div>
 
   <!-- Dashboard -->
   <div class="card">
@@ -492,6 +506,7 @@ const I18N={
  pt:{
   "app.title":"Velocity","app.sub":"Controlo de Empreitada · Aceitar",
   "tb.new":"Novo período","tb.clone":"Criar a partir do último","tb.export":"Exportar JSON","tb.print":"Imprimir / PDF","tb.hist":"Histórico","tb.save":"Guardar",
+  "ro.banner":"Modo de leitura — o conteúdo está auto-traduzido. Muda para PT para editar.",
   "s0.h":"Identificação & Período","s0.data":"Data","s0.obra":"Obra","s0.obra.ph":"Designação / código da obra","s0.autor":"Autor","s0.autor.ph":"Nome do responsável",
   "s0.ptipo":"Periodicidade","s0.ptipo.w":"Semanal","s0.ptipo.b":"Quinzenal","s0.ptipo.m":"Mensal","s0.ptipo.o":"Outro","s0.pini":"Período — início","s0.pfim":"Período — fim",
   "s1.h":"Trabalhos Normais","s1.sub":"Execução vs. Cronograma Financeiro","s1.col.rub":"Rubrica","s1.col.abs":"Valor absoluto (€)","s1.col.rel":"Relativo (%)",
@@ -527,6 +542,7 @@ const I18N={
  en:{
   "app.title":"Velocity","app.sub":"Contract Works Control · Aceitar",
   "tb.new":"New period","tb.clone":"Create from last","tb.export":"Export JSON","tb.print":"Print / PDF","tb.hist":"History","tb.save":"Save",
+  "ro.banner":"Read-only mode — content is auto-translated. Switch to PT to edit.",
   "s0.h":"Identification & Period","s0.data":"Date","s0.obra":"Project","s0.obra.ph":"Project name / code","s0.autor":"Author","s0.autor.ph":"Responsible name",
   "s0.ptipo":"Frequency","s0.ptipo.w":"Weekly","s0.ptipo.b":"Biweekly","s0.ptipo.m":"Monthly","s0.ptipo.o":"Other","s0.pini":"Period — start","s0.pfim":"Period — end",
   "s1.h":"Normal Works","s1.sub":"Progress vs. Financial Schedule","s1.col.rub":"Item","s1.col.abs":"Absolute value (€)","s1.col.rel":"Relative (%)",
@@ -561,7 +577,7 @@ const I18N={
  }
 };
 /* ============================ version (single source) ============================ */
-const APP_VER='v26.06.01.1353';
+const APP_VER='v26.06.09.1523';
 
 /* ============================ editor mode ============================ */
 function showEditor(){ document.body.classList.add('editing'); }
@@ -583,10 +599,23 @@ function toFloat(v){
   if(LANG==='pt') s=s.replace(',','.');        // PT decimal comma → dot
   return parseFloat(s);
 }
+// toFloatLang: explicit-locale parser (for lang switching).
+function toFloatLang(v, lang){
+  if(v===''||v==null) return NaN;
+  let s=String(v).replace(/\s/g,'');
+  if(lang==='pt'){ s=s.replace(/\./g,'').replace(',','.'); }
+  else            { s=s.replace(/,/g,''); }
+  return parseFloat(s);
+}
 function fmtNumDisp(v){
   if(v===''||v==null) return '';
   const n=toFloat(v);
   if(!isFinite(n)) return String(v);
+  return new Intl.NumberFormat(LANG==='pt'?'pt-PT':'en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
+}
+// Format a JS number directly (no locale parsing). Use when reformatting on language switch.
+function fmtNumber(n){
+  if(!isFinite(n)) return '';
   return new Intl.NumberFormat(LANG==='pt'?'pt-PT':'en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
 }
 function applyMoneyFormat(){
@@ -667,7 +696,9 @@ function blank(){
   };
 }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
-const num = v => { const n=toFloat(v); return isNaN(n)?0:n; };
+// State always stores PT-formatted strings (canonical). num() parses them explicitly in PT,
+// not via toFloat() — toFloat depends on current LANG and would mangle PT strings in EN mode.
+const num = v => { const n=toFloatLang(v,'pt'); return isNaN(n)?0:n; };
 
 /* ============================ formatting ============================ */
 function fmtMoney(v){
@@ -682,6 +713,9 @@ function fmtPct(v){ if(!isFinite(v)) return '—'; return new Intl.NumberFormat(
 
 /* ============================ form <-> state ============================ */
 function readForm(){
+  // In EN mode the report is read-only: the DOM holds reformatted numbers and translated text
+  // that do NOT represent the canonical state. Reading would corrupt it.
+  if(LANG==='en') return;
   state.meta={data:val('m-data'),obra:val('m-obra'),autor:val('m-autor'),ptipo:val('m-ptipo'),pini:val('m-pini'),pfim:val('m-pfim')};
   state.tn={total:val('tn-total'),trabAnt:val('tn-trab-ant'),admDir:val('tn-adm-dir'),novoContr:val('tn-novo-contr'),exec:val('tn-exec'),cron:val('tn-cron'),nota:val('tn-nota')};
   state.tcAprov=val('tc-aprov-val');
@@ -724,7 +758,7 @@ function writeForm(){
   });
   set('m-data',state.meta.data); set('m-obra',state.meta.obra); set('m-autor',state.meta.autor);
   set('m-ptipo',state.meta.ptipo||'semanal'); set('m-pini',state.meta.pini); set('m-pfim',state.meta.pfim);
-  // Migrate legacy v26.06.01.1353: totalNew (manual "Total Contratado (novo)") → total
+  // Migrate legacy v26.06.09.1523: totalNew (manual "Total Contratado (novo)") → total
   if(state.tn && state.tn.totalNew && !state.tn.total){ state.tn.total = state.tn.totalNew; }
   if(state.tn) delete state.tn.totalNew;
   set('tn-total',state.tn.total); set('tn-trab-ant',state.tn.trabAnt); set('tn-adm-dir',state.tn.admDir); set('tn-novo-contr',state.tn.novoContr);
@@ -960,7 +994,7 @@ function cloneLast(){
 }
 function loadRecord(id){
   const r=DB.find(x=>x.id===id); if(!r) return;
-  state=structuredClone(r._payload||blank()); editingId=id; writeForm(); applyMoneyFormat(); recalc(); renderHist(); renderObraView(); closeHist(); showEditor(); window.scrollTo({top:0,behavior:'smooth'}); toast(t('msg.loaded'));
+  state=structuredClone(r._payload||blank()); editingId=id; writeForm(); applyMoneyFormat(); recalc(); renderHist(); renderObraView(); closeHist(); showEditor(); applyEditableState(LANG==='en'); if(LANG==='en') translateVisibleContent(); window.scrollTo({top:0,behavior:'smooth'}); toast(t('msg.loaded'));
 }
 async function deleteRecord(id,ev){
   ev?.stopPropagation();
@@ -1109,12 +1143,94 @@ let toastT;
 function toast(msg){ const e=document.getElementById('toast'); e.textContent=msg; e.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>e.classList.remove('show'),2200); }
 
 /* ============================ language ============================ */
-function setLang(l){
+async function setLang(l){
+  const prevLang = LANG;
+  if(l===prevLang){
+    // Initial boot — apply current language without re-format
+    document.documentElement.lang=l;
+    document.getElementById('lang-pt').classList.toggle('on',l==='pt');
+    document.getElementById('lang-en').classList.toggle('on',l==='en');
+    document.body.classList.toggle('lang-en', l==='en');
+    document.body.classList.toggle('lang-pt', l==='pt');
+    applyLang(); applyMoneyFormat();
+    applyEditableState(l==='en');
+    if(l==='en') translateVisibleContent();
+    return;
+  }
+  // Switch flag + body
   LANG=l; localStorage_safe('set','ace_fisc_lang',l);
   document.documentElement.lang=l;
   document.getElementById('lang-pt').classList.toggle('on',l==='pt');
   document.getElementById('lang-en').classList.toggle('on',l==='en');
-  applyLang();
+  document.body.classList.toggle('lang-en', l==='en');
+  document.body.classList.toggle('lang-pt', l==='pt');
+  const wasEditing = document.body.classList.contains('editing');
+  if(l==='pt'){
+    // EN → PT: restore state (canonical PT) to DOM BEFORE applyLang to prevent readForm pollution
+    if(wasEditing) writeForm();
+    applyLang();          // re-renders dynamic items from state (already PT)
+    applyMoneyFormat();   // formats with current LANG (pt) — values are already PT, no mangling
+  } else {
+    // PT → EN: re-render via applyLang then convert DOM money values from PT to EN
+    applyLang();
+    document.querySelectorAll('.inp.money').forEach(el=>{
+      if(!el.value) return;
+      const n=toFloatLang(el.value, prevLang);   // parse PT explicitly
+      if(isFinite(n)) el.value=fmtNumber(n);     // format EN
+    });
+  }
+  applyEditableState(l==='en');
+  if(l==='en' && wasEditing) translateVisibleContent();   // fire-and-forget; runs after recalc
+  recalc();
+}
+function applyEditableState(ro){
+  document.querySelectorAll('#editor input, #editor textarea').forEach(el=>{
+    if(el.type==='checkbox'||el.type==='radio'){ el.disabled = ro; return; }
+    if(ro) el.setAttribute('readonly','readonly');
+    else   el.removeAttribute('readonly');
+  });
+  document.querySelectorAll('#editor select').forEach(el=>{
+    if(ro) el.setAttribute('disabled','disabled');
+    else   el.removeAttribute('disabled');
+  });
+}
+async function translateText(text){
+  if(!text || !text.trim() || text.length<2) return text;
+  if(/^[\d\s.,€%+\-]+$/.test(text)) return text;        // skip pure numbers / dates
+  if(/^\d{4}-\d{2}-\d{2}/.test(text)) return text;       // skip ISO dates
+  const key='xlate:pt-en:'+text;
+  try{ const c=localStorage_safe('get',key); if(c) return c; }catch(e){}
+  try{
+    const url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=pt|en';
+    const resp=await fetch(url);
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const data=await resp.json();
+    const result=data?.responseData?.translatedText;
+    if(result && typeof result==='string' && result.toLowerCase()!=='no translation found'){
+      try{ localStorage_safe('set',key,result); }catch(e){}
+      return result;
+    }
+  }catch(e){ console.warn('translate fail:',e.message); }
+  return text;
+}
+async function translateVisibleContent(){
+  if(LANG!=='en') return;
+  sbStatus('bz');
+  const targets=[...document.querySelectorAll('#editor input.inp:not(.money), #editor textarea')]
+    .filter(el => el.type!=='date' && el.type!=='number' && el.value && el.value.trim());
+  const CHUNK=4;
+  for(let i=0;i<targets.length;i+=CHUNK){
+    const batch=targets.slice(i,i+CHUNK);
+    await Promise.all(batch.map(async el=>{
+      const original=el.value;
+      try{
+        const t=await translateText(original);
+        // Only apply if user hasn't switched back to PT during translation
+        if(LANG==='en' && t && t!==original) el.value=t;
+      }catch(e){}
+    }));
+  }
+  sbStatus('ok');
 }
 function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(e=>{
@@ -1126,7 +1242,7 @@ function applyLang(){
     if(!done) e.textContent=I18N[LANG][k];
   });
   document.querySelectorAll('[data-i18n-ph]').forEach(e=>{ const k=e.getAttribute('data-i18n-ph'); if(I18N[LANG][k]!==undefined) e.placeholder=I18N[LANG][k]; });
-  renderTCP(); renderWK(); renderTM(); renderPE(); renderPA(); recalc(); renderHist(); renderObraView(); applyMoneyFormat();
+  renderTCP(); renderWK(); renderTM(); renderPE(); renderPA(); recalc(); renderHist(); renderObraView();
 }
 
 /* ============================ boot ============================ */
