@@ -126,7 +126,12 @@
   .wk-sum:empty{border-top:0;padding-top:0;margin-top:0}
   .row-pe{grid-template-columns:90px 110px 1fr 1fr 36px}
   .row-wk{grid-template-columns:1fr 150px 36px}
-  .row-tm{grid-template-columns:110px 1fr 36px}
+  .row-tm{grid-template-columns:110px 1fr 80px 180px 110px 110px 36px}
+  .row-tm .chk-yn{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--brd);border-radius:6px;background:#fff;font-size:13px;cursor:pointer;user-select:none}
+  .row-tm .chk-yn input{margin:0;width:14px;height:14px;cursor:pointer}
+  .row-tm .chk-yn .chk-label{font-weight:600;color:var(--navy)}
+  body.lang-en .row-tm .chk-yn{cursor:default;background:#fafbfc;color:#555}
+  body.lang-en .row-tm .chk-yn input{cursor:default}
   @media(max-width:820px){.row-tc,.row-tcp,.row-pe,.row-tm{grid-template-columns:1fr}}
   .row-item .micro{font-size:9.5px;color:var(--muted-2);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;display:block}
   .iconbtn{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
@@ -206,7 +211,7 @@
 <div class="nav">
   <div class="brand">
     <div class="logo">V</div>
-    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.09.1523</small></div>
+    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.15.1229</small></div>
   </div>
   <div class="spacer"></div>
   <label class="nav-deploy" id="btn-deploy" title="Deploy para GitHub / Vercel">🚀 Deploy
@@ -217,7 +222,7 @@
     <button id="lang-en" onclick="setLang('en')">EN</button>
   </div>
   <span id="sb-dot" class="sb-dot" title="Supabase"></span>
-  <span class="badge-ver" id="ver-badge">v26.06.09.1523</span>
+  <span class="badge-ver" id="ver-badge">v26.06.15.1229</span>
 </div>
 
 <div class="wrap">
@@ -524,7 +529,7 @@ const I18N={
   "s5.h":"Trabalhos Previstos e em Curso","s5.sub":"Cruzamento Previsto × Em Curso para detetar frentes fora do plano","s5.add":"Adicionar frente de trabalho","s5.empty":"Sem frentes registadas.",
   "wk.desc":"Frente / descrição","wk.desc.ph":"Descrição da frente de trabalho","wk.prev":"Previsto","wk.curso":"Em curso",
   "wk.stat.ok":"No plano","wk.stat.warn":"Por iniciar","wk.stat.risk":"Fora do plano","wk.stat.none":"—",
-  "s6.h":"Temas Efetuados pela Fiscalização","s6.add":"Adicionar tema","tm.data":"Data","tm.desc":"Tema / ação","tm.desc.ph":"Descrição do tema tratado pela Fiscalização",
+  "s6.h":"Temas Efetuados pela Fiscalização","s6.add":"Adicionar tema","tm.data":"Data","tm.desc":"Tema / ação","tm.desc.ph":"Descrição do tema tratado pela Fiscalização","tm.ver":"Versão","tm.ver.ph":"v1","tm.resp":"Responsável","tm.resp.ph":"Nome do responsável","tm.ajuda":"Ajuda DO","tm.done":"Concluído","yes":"Sim","no":"Não",
   "s7.h":"Situações Pendentes","s7.sub":"Pedidos de Esclarecimento & Pedidos de Aprovação","s7.pe":"Pedidos de Esclarecimento (PE)","s7.pe.add":"Adicionar pedido de esclarecimento","s7.pa":"Pedidos de Aprovação (PA)","s7.pa.add":"Adicionar pedido de aprovação",
   "pe.id":"Id","pe.data":"Data","pe.desc":"Descrição","pe.motivo":"Motivo","pe.desc.ph":"Descrição","pe.motivo.ph":"Motivo / estado",
   "s8.h":"Observações Gerais","s8.ph":"Notas finais, conclusões e recomendações do período…",
@@ -560,7 +565,7 @@ const I18N={
   "s5.h":"Planned & Ongoing Works","s5.sub":"Planned × Ongoing cross-check to surface off-plan fronts","s5.add":"Add work front","s5.empty":"No fronts recorded.",
   "wk.desc":"Front / description","wk.desc.ph":"Work front description","wk.prev":"Planned","wk.curso":"Ongoing",
   "wk.stat.ok":"On plan","wk.stat.warn":"Not started","wk.stat.risk":"Off-plan","wk.stat.none":"—",
-  "s6.h":"Topics Handled by Supervision","s6.add":"Add topic","tm.data":"Date","tm.desc":"Topic / action","tm.desc.ph":"Description of the topic handled by Supervision",
+  "s6.h":"Topics Handled by Supervision","s6.add":"Add topic","tm.data":"Date","tm.desc":"Topic / action","tm.desc.ph":"Description of the topic handled by Supervision","tm.ver":"Version","tm.ver.ph":"v1","tm.resp":"Responsible","tm.resp.ph":"Name of responsible","tm.ajuda":"Owner help","tm.done":"Done","yes":"Yes","no":"No",
   "s7.h":"Pending Items","s7.sub":"Requests for Information & Approval Requests","s7.pe":"Requests for Information (RFI)","s7.pe.add":"Add request for information","s7.pa":"Approval Requests (AR)","s7.pa.add":"Add approval request",
   "pe.id":"Id","pe.data":"Date","pe.desc":"Description","pe.motivo":"Reason","pe.desc.ph":"Description","pe.motivo.ph":"Reason / status",
   "s8.h":"General Remarks","s8.ph":"Final notes, conclusions and recommendations for the period…",
@@ -577,7 +582,7 @@ const I18N={
  }
 };
 /* ============================ version (single source) ============================ */
-const APP_VER='v26.06.09.1523';
+const APP_VER='v26.06.15.1229';
 
 /* ============================ editor mode ============================ */
 function showEditor(){ document.body.classList.add('editing'); }
@@ -758,7 +763,7 @@ function writeForm(){
   });
   set('m-data',state.meta.data); set('m-obra',state.meta.obra); set('m-autor',state.meta.autor);
   set('m-ptipo',state.meta.ptipo||'semanal'); set('m-pini',state.meta.pini); set('m-pfim',state.meta.pfim);
-  // Migrate legacy v26.06.09.1523: totalNew (manual "Total Contratado (novo)") → total
+  // Migrate legacy v26.06.15.1229: totalNew (manual "Total Contratado (novo)") → total
   if(state.tn && state.tn.totalNew && !state.tn.total){ state.tn.total = state.tn.totalNew; }
   if(state.tn) delete state.tn.totalNew;
   set('tn-total',state.tn.total); set('tn-trab-ant',state.tn.trabAnt); set('tn-adm-dir',state.tn.admDir); set('tn-novo-contr',state.tn.novoContr);
@@ -776,7 +781,7 @@ const set = (id,v)=>{ const e=document.getElementById(id); if(e) e.value=(v??'')
 /* ============================ dynamic lists ============================ */
 function addTcp(){ state.tcp.push({id:nextId('tcp'),data:'',valor:'',desc:''}); renderTCP(); recalc(); }
 function addWK(){ state.wk.push({desc:'',prev:true,curso:false}); renderWK(); }
-function addTM(){ state.tm.push({data:'',desc:''}); renderTM(); }
+function addTM(){ state.tm.push({data:'',desc:'',ver:'',resp:'',ajudaDo:false,done:false}); renderTM(); }
 function addPE(){ state.pe.push({id:nextId('pe'),data:'',desc:'',motivo:''}); renderPE(); }
 function addPA(){ state.pa.push({id:nextId('pa'),data:'',desc:'',motivo:''}); renderPA(); }
 function nextId(kind){ const pref={pe:'PE',pa:'PA',tcp:'TCP'}[kind]||kind.toUpperCase(); const arr=state[kind]||[]; return pref+'-'+String(arr.length+1).padStart(2,'0'); }
@@ -830,10 +835,15 @@ function renderWK(){
 function renderTM(){
   const c=document.getElementById('tm-rows');
   if(!state.tm.length){ c.innerHTML=`<div class="empty">—</div>`; return; }
+  const yes=t('yes'), no=t('no');
   c.innerHTML=state.tm.map((r,i)=>`
    <div class="row-item row-tm">
      <div><span class="micro">${t('tm.data')}</span><input class="inp" type="date" value="${esc(r.data)}" oninput="state.tm[${i}].data=this.value"></div>
      <div><span class="micro">${t('tm.desc')}</span><input class="inp" placeholder="${t('tm.desc.ph')}" value="${esc(r.desc)}" oninput="state.tm[${i}].desc=this.value"></div>
+     <div><span class="micro">${t('tm.ver')}</span><input class="inp" placeholder="${t('tm.ver.ph')}" value="${esc(r.ver||'')}" oninput="state.tm[${i}].ver=this.value"></div>
+     <div><span class="micro">${t('tm.resp')}</span><input class="inp" placeholder="${t('tm.resp.ph')}" value="${esc(r.resp||'')}" oninput="state.tm[${i}].resp=this.value"></div>
+     <div><span class="micro">${t('tm.ajuda')}</span><label class="chk-yn"><input type="checkbox" ${r.ajudaDo?'checked':''} onchange="state.tm[${i}].ajudaDo=this.checked;this.nextElementSibling.textContent=this.checked?'${yes}':'${no}'"><span class="chk-label">${r.ajudaDo?yes:no}</span></label></div>
+     <div><span class="micro">${t('tm.done')}</span><label class="chk-yn"><input type="checkbox" ${r.done?'checked':''} onchange="state.tm[${i}].done=this.checked;this.nextElementSibling.textContent=this.checked?'${yes}':'${no}'"><span class="chk-label">${r.done?yes:no}</span></label></div>
      <button class="iconbtn rm" onclick="del('tm',${i})">✕</button>
    </div>`).join('');
 }
@@ -1198,6 +1208,7 @@ async function translateText(text){
   if(!text || !text.trim() || text.length<2) return text;
   if(/^[\d\s.,€%+\-]+$/.test(text)) return text;        // skip pure numbers / dates
   if(/^\d{4}-\d{2}-\d{2}/.test(text)) return text;       // skip ISO dates
+  if(/^v\d+(\.\d+)*$/i.test(text.trim())) return text;   // skip version tags (v1, v2, v1.0, v2.3.1)
   const key='xlate:pt-en:'+text;
   try{ const c=localStorage_safe('get',key); if(c) return c; }catch(e){}
   try{
