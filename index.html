@@ -211,7 +211,7 @@
 <div class="nav">
   <div class="brand">
     <div class="logo">V</div>
-    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.06.15.1229</small></div>
+    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.07.06.1411</small></div>
   </div>
   <div class="spacer"></div>
   <label class="nav-deploy" id="btn-deploy" title="Deploy para GitHub / Vercel">🚀 Deploy
@@ -222,7 +222,7 @@
     <button id="lang-en" onclick="setLang('en')">EN</button>
   </div>
   <span id="sb-dot" class="sb-dot" title="Supabase"></span>
-  <span class="badge-ver" id="ver-badge">v26.06.15.1229</span>
+  <span class="badge-ver" id="ver-badge">v26.07.06.1411</span>
 </div>
 
 <div class="wrap">
@@ -582,7 +582,7 @@ const I18N={
  }
 };
 /* ============================ version (single source) ============================ */
-const APP_VER='v26.06.15.1229';
+const APP_VER='v26.07.06.1411';
 
 /* ============================ editor mode ============================ */
 function showEditor(){ document.body.classList.add('editing'); }
@@ -616,12 +616,12 @@ function fmtNumDisp(v){
   if(v===''||v==null) return '';
   const n=toFloat(v);
   if(!isFinite(n)) return String(v);
-  return new Intl.NumberFormat(LANG==='pt'?'pt-PT':'en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
+  return new Intl.NumberFormat('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
 }
-// Format a JS number directly (no locale parsing). Use when reformatting on language switch.
+// Format a JS number directly (always pt-PT — numeric convention does not translate).
 function fmtNumber(n){
   if(!isFinite(n)) return '';
-  return new Intl.NumberFormat(LANG==='pt'?'pt-PT':'en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
+  return new Intl.NumberFormat('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
 }
 function applyMoneyFormat(){
   document.querySelectorAll('.inp.money').forEach(el=>{
@@ -706,15 +706,19 @@ function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(
 const num = v => { const n=toFloatLang(v,'pt'); return isNaN(n)?0:n; };
 
 /* ============================ formatting ============================ */
+// Numbers ALWAYS formatted in pt-PT regardless of LANG. This is a PT report with EUR values;
+// the numeric convention is canonical and does not translate. Only labels and text content translate.
+// Column headers already display "(€)"; individual values never carry the € symbol.
 function fmtMoney(v){
-  return new Intl.NumberFormat(LANG==='pt'?'pt-PT':'en-GB',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+  return new Intl.NumberFormat('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
 }
 function fmtMoneyShort(v){
-  const a=Math.abs(v); let s;
-  if(a>=1e6) s=(v/1e6).toFixed(2)+'M'; else if(a>=1e3) s=(v/1e3).toFixed(0)+'k'; else s=Math.round(v).toString();
-  return '€'+s;
+  const a=Math.abs(v);
+  if(a>=1e6) return (v/1e6).toFixed(2).replace('.',',')+'M';
+  if(a>=1e3) return (v/1e3).toFixed(0)+'k';
+  return Math.round(v).toString();
 }
-function fmtPct(v){ if(!isFinite(v)) return '—'; return new Intl.NumberFormat(LANG==='pt'?'pt-PT':'en-GB',{maximumFractionDigits:1}).format(v)+'%'; }
+function fmtPct(v){ if(!isFinite(v)) return '—'; return new Intl.NumberFormat('pt-PT',{maximumFractionDigits:1}).format(v)+'%'; }
 
 /* ============================ form <-> state ============================ */
 function readForm(){
@@ -763,7 +767,7 @@ function writeForm(){
   });
   set('m-data',state.meta.data); set('m-obra',state.meta.obra); set('m-autor',state.meta.autor);
   set('m-ptipo',state.meta.ptipo||'semanal'); set('m-pini',state.meta.pini); set('m-pfim',state.meta.pfim);
-  // Migrate legacy v26.06.15.1229: totalNew (manual "Total Contratado (novo)") → total
+  // Migrate legacy v26.07.06.1411: totalNew (manual "Total Contratado (novo)") → total
   if(state.tn && state.tn.totalNew && !state.tn.total){ state.tn.total = state.tn.totalNew; }
   if(state.tn) delete state.tn.totalNew;
   set('tn-total',state.tn.total); set('tn-trab-ant',state.tn.trabAnt); set('tn-adm-dir',state.tn.admDir); set('tn-novo-contr',state.tn.novoContr);
@@ -1153,10 +1157,12 @@ let toastT;
 function toast(msg){ const e=document.getElementById('toast'); e.textContent=msg; e.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>e.classList.remove('show'),2200); }
 
 /* ============================ language ============================ */
+// LANG only affects: (1) UI labels via applyLang, (2) text content via translation, (3) read-only mode in EN.
+// It NEVER affects numeric formatting — money and percentages are always pt-PT.
 async function setLang(l){
   const prevLang = LANG;
   if(l===prevLang){
-    // Initial boot — apply current language without re-format
+    // Initial boot
     document.documentElement.lang=l;
     document.getElementById('lang-pt').classList.toggle('on',l==='pt');
     document.getElementById('lang-en').classList.toggle('on',l==='en');
@@ -1167,7 +1173,6 @@ async function setLang(l){
     if(l==='en') translateVisibleContent();
     return;
   }
-  // Switch flag + body
   LANG=l; localStorage_safe('set','ace_fisc_lang',l);
   document.documentElement.lang=l;
   document.getElementById('lang-pt').classList.toggle('on',l==='pt');
@@ -1178,19 +1183,15 @@ async function setLang(l){
   if(l==='pt'){
     // EN → PT: restore state (canonical PT) to DOM BEFORE applyLang to prevent readForm pollution
     if(wasEditing) writeForm();
-    applyLang();          // re-renders dynamic items from state (already PT)
-    applyMoneyFormat();   // formats with current LANG (pt) — values are already PT, no mangling
+    applyLang();          // re-renders dynamic items from state
+    applyMoneyFormat();   // formats money inputs in pt-PT (no-op if already correct)
   } else {
-    // PT → EN: re-render via applyLang then convert DOM money values from PT to EN
+    // PT → EN: labels change, text content will be translated, read-only becomes active.
+    // Numbers stay exactly as they were in the DOM — no reformat.
     applyLang();
-    document.querySelectorAll('.inp.money').forEach(el=>{
-      if(!el.value) return;
-      const n=toFloatLang(el.value, prevLang);   // parse PT explicitly
-      if(isFinite(n)) el.value=fmtNumber(n);     // format EN
-    });
   }
   applyEditableState(l==='en');
-  if(l==='en' && wasEditing) translateVisibleContent();   // fire-and-forget; runs after recalc
+  if(l==='en' && wasEditing) translateVisibleContent();   // fire-and-forget
   recalc();
 }
 function applyEditableState(ro){
