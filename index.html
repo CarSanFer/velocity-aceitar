@@ -1,1297 +1,480 @@
-<!doctype html>
-<html lang="pt">
+<!DOCTYPE html>
+<html lang="pt" data-theme="dark">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Velocity · Controlo de Empreitada</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tetrápodes | Esporão Sul de Espinho</title>
 <style>
   :root{
-    --navy:#1E3A5F; --navy-2:#2c5f8a; --gold:#C9922A;
-    --bg:#f4f6f9; --card:#ffffff; --line:#e4e8ee; --line-2:#eef1f5;
-    --text:#1f2733; --muted:#6b7785; --muted-2:#9aa4b2;
-    --ok:#2e7d4f; --ok-bg:#e8f4ec; --warn:#C9922A; --warn-bg:#fbf3e1;
-    --risk:#c0392b; --risk-bg:#fbeae8; --info:#2c5f8a; --info-bg:#e9f0f6;
-    --radius:8px; --radius-sm:6px;
-    --mono:ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
-    --sans:'Calibri','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
-    --shadow:0 1px 2px rgba(20,35,60,.04),0 4px 14px rgba(20,35,60,.05);
+    --bg:#0f151c; --panel:#171f29; --panel2:#1d2733; --line:#2a3744;
+    --txt:#e8edf2; --muted:#8b9aa8; --faint:#5d6c7a; --stripe:#ffffff08;
+    --accent:#f4a259; --accent2:#4895ef; --field:#101820; --fieldtx:#e8edf2;
+    --radius:10px;
+    --font:'Segoe UI',system-ui,-apple-system,sans-serif;
   }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+  html[data-theme="light"]{
+    --bg:#eef1f5; --panel:#ffffff; --panel2:#eef2f6; --line:#d8dfe7;
+    --txt:#1a2530; --muted:#5d6c7a; --faint:#94a2b0; --stripe:#0000000a;
+    --accent:#e08a3c; --accent2:#2f74d0; --field:#ffffff; --fieldtx:#1a2530;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1.45;padding:22px;font-size:14px}
+  .wrap{max-width:1240px;margin:0 auto}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
-  /* ---------- Nav ---------- */
-  .nav{position:sticky;top:0;z-index:50;height:56px;background:var(--navy);color:#fff;display:flex;align-items:center;gap:14px;padding:0 18px;box-shadow:0 2px 10px rgba(20,35,60,.18)}
-  .nav .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.3px}
-  .nav .logo{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--gold),#a9781f);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#1a2b40}
-  .nav .ttl{font-size:14.5px;line-height:1.05}
-  .nav .ttl small{display:block;font-size:10px;font-weight:500;color:#aebed3;letter-spacing:.6px;text-transform:uppercase}
-  .nav .ttl .ver-line{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--gold);letter-spacing:.3px;text-transform:none;margin-top:1px}
-  .nav .spacer{flex:1}
-  .badge-ver{font-family:var(--mono);font-size:10.5px;font-weight:600;color:#1a2b40;background:var(--gold);padding:3px 8px;border-radius:5px;letter-spacing:.3px}
-  .sb-dot{width:8px;height:8px;border-radius:50%;background:#6b7785;display:inline-block;transition:.2s;box-shadow:0 0 0 2px rgba(255,255,255,.15)}
-  .sb-dot.ok{background:#3ecf6f;box-shadow:0 0 0 2px rgba(62,207,111,.25),0 0 8px rgba(62,207,111,.5)}
-  .sb-dot.err{background:#e74c3c;box-shadow:0 0 0 2px rgba(231,76,60,.25),0 0 8px rgba(231,76,60,.6)}
-  .sb-dot.bz{background:var(--gold);box-shadow:0 0 0 2px rgba(201,146,42,.25)}
-  .nav .btn-lang{display:flex;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);border-radius:7px;overflow:hidden}
-  .nav .btn-lang button{background:none;border:0;color:#cdd9e8;font-family:var(--sans);font-size:12px;font-weight:600;padding:5px 10px;cursor:pointer}
-  .nav .btn-lang button.on{background:#fff;color:var(--navy)}
-  .nav-deploy{display:flex;align-items:center;gap:5px;cursor:pointer;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.20);color:#dbe6f2;font-size:11.5px;font-weight:600;border-radius:7px;padding:5px 10px;transition:.12s;font-family:var(--sans);white-space:nowrap}
-  .nav-deploy:hover{background:rgba(255,255,255,.18);color:#fff}
+  #gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+  .login{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:32px 30px;width:330px;box-shadow:0 18px 50px #0006}
+  .login .eyebrow{font-size:10.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .login h1{font-size:19px;margin:4px 0 20px}
+  .login label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin:12px 0 5px}
+  .login input{width:100%;background:var(--field);color:var(--fieldtx);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font-size:14px;font-family:inherit}
+  .login button{width:100%;margin-top:20px;background:var(--accent);color:#1a1207;border:none;border-radius:7px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+  .login .err{color:#e76f51;font-size:12px;margin-top:12px;min-height:15px;text-align:center}
 
-  .wrap{max-width:1180px;margin:0 auto;padding:18px 18px 80px}
+  header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+  .eyebrow{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);font-weight:700}
+  h1{font-size:25px;font-weight:700;letter-spacing:-.3px;margin-top:3px}
+  .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .htools{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .theme{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px}
+  .theme button{background:none;border:none;color:var(--muted);font-size:11px;font-weight:600;padding:5px 9px;border-radius:5px;cursor:pointer;font-family:inherit}
+  .theme button.active{background:var(--accent);color:#1a1207}
+  .badge{font-size:11px;color:var(--faint);border:1px solid var(--line);padding:4px 9px;border-radius:20px;white-space:nowrap}
 
-  /* ---------- Toolbar ---------- */
-  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
-  .toolbar .grow{flex:1}
-  .btn{font-family:var(--sans);font-size:13px;font-weight:600;border-radius:var(--radius-sm);padding:8px 13px;cursor:pointer;border:1px solid transparent;display:inline-flex;align-items:center;gap:6px;transition:.12s}
-  .btn-gold{background:var(--gold);color:#1a2b40}.btn-gold:hover{filter:brightness(1.05)}
-  .btn-navy{background:var(--navy);color:#fff}.btn-navy:hover{background:#16304f}
-  .btn-out{background:#fff;color:var(--navy);border-color:var(--line)}.btn-out:hover{border-color:var(--navy-2);color:var(--navy-2)}
-  .btn-ghost{background:transparent;color:var(--muted)}.btn-ghost:hover{color:var(--text);background:#fff}
-  .btn-sm{font-size:12px;padding:5px 9px}
-  .btn-danger{background:#fff;color:var(--risk);border-color:#f0cfca}.btn-danger:hover{background:var(--risk-bg)}
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 15px;position:relative;overflow:hidden}
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent)}
+  .kpi.alt::before{background:var(--accent2)}
+  .kpi .v{font-size:30px;font-weight:800;letter-spacing:-1px;font-variant-numeric:tabular-nums;line-height:1}
+  .kpi .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:7px}
 
-  /* ---------- Cards / sections ---------- */
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px}
-  .sec-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line-2);cursor:pointer;user-select:none}
-  .sec-head .n{width:22px;height:22px;flex:none;border-radius:6px;background:var(--info-bg);color:var(--info);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
-  .sec-head h2{margin:0;font-size:14px;font-weight:700;color:var(--navy)}
-  .sec-head .sub{font-size:11.5px;color:var(--muted-2);font-weight:500}
-  .sec-head .chev{margin-left:auto;color:var(--muted-2);transition:.18s;font-size:12px}
-  .sec.collapsed .sec-body{display:none}
-  .sec.collapsed .chev{transform:rotate(-90deg)}
-  .sec-body{padding:16px}
+  .filters{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:13px 16px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
+  .fgroup{display:flex;flex-direction:column;gap:5px}
+  .flabel{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+  select,input[type=date],input[type=number]{background:var(--field);color:var(--fieldtx);border:1px solid var(--line);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;min-width:120px}
+  .btn{background:var(--panel2);color:var(--txt);border:1px solid var(--line);padding:8px 13px;border-radius:7px;font-size:12.5px;cursor:pointer;font-family:inherit;font-weight:600;transition:.12s}
+  .btn:hover{border-color:var(--accent)}
+  .btn.active{background:var(--accent);border-color:var(--accent);color:#1a1207}
+  .btn.amber{background:var(--accent);border-color:var(--accent);color:#1a1207}
+  .spacer{margin-left:auto}
 
-  /* ---------- Form ---------- */
-  label.lab{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
-  .inp,select.inp,textarea.inp{width:100%;font-family:var(--sans);font-size:13.5px;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px 10px;outline:none;transition:.12s}
-  .inp:focus,textarea.inp:focus,select.inp:focus{border-color:var(--navy-2);box-shadow:0 0 0 3px rgba(44,95,138,.10)}
-  textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
-  .inp.money{text-align:right;font-family:var(--mono);font-size:13px}
-  .grid{display:grid;gap:12px}
-  .g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)}
-  .g4{grid-template-columns:repeat(4,1fr)} .g5{grid-template-columns:repeat(5,1fr)} .g6{grid-template-columns:repeat(6,1fr)}
-  @media(max-width:820px){.g3,.g4,.g5,.g6{grid-template-columns:repeat(2,1fr)} .g2{grid-template-columns:1fr}}
-  .field .hint{font-size:11px;color:var(--muted-2);margin-top:3px;font-family:var(--mono)}
+  details.sec{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+  details.sec>summary{cursor:pointer;list-style:none;padding:14px 18px;display:flex;align-items:center;gap:10px;font-size:13px;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;user-select:none}
+  details.sec>summary::-webkit-details-marker{display:none}
+  details.sec>summary::before{content:"";border-left:6px solid var(--accent);border-top:5px solid transparent;border-bottom:5px solid transparent;transition:transform .15s}
+  details.sec[open]>summary::before{transform:rotate(90deg)}
+  details.sec>summary .count{margin-left:auto;color:var(--muted);font-weight:600;letter-spacing:.5px}
+  .secbody{padding:0 18px 18px}
 
-  /* ---------- Dashboard KPIs ---------- */
-  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
-  @media(max-width:980px){.kpis{grid-template-columns:repeat(3,1fr)}}
+  .recform{display:flex;flex-wrap:wrap;gap:13px;align-items:flex-end;padding:4px 0 14px;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .recform .fgroup input,.recform .fgroup select{min-width:120px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:1.2px;text-align:center;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+  .toggle{display:flex;gap:6px;justify-content:center;margin-bottom:10px}
+  .toggle .btn{padding:4px 11px;font-size:11.5px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;align-items:stretch}
+  .grid .card{display:flex;flex-direction:column}
+  .chartbox{flex:1;display:flex;align-items:center}
+  svg{width:100%;display:block;overflow:visible}
+  svg text{font-family:var(--font)}
+  .glabel{fill:var(--muted);font-size:10.5px;font-weight:600}
+  .gval{fill:var(--txt);font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+
+  .perfis{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:14px}
+  .pcard{background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:.15s;cursor:pointer}
+  .pcard.dim{opacity:.28}
+  .phead{padding:11px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+  .ptag{font-size:15px;font-weight:800;letter-spacing:.5px}
+  .ptot{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+  .pmeta{font-size:10.5px;color:var(--muted);padding:7px 14px;display:flex;gap:12px;border-bottom:1px solid var(--line)}
+  .pmeta b{color:var(--txt);font-variant-numeric:tabular-nums}
+
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);text-align:center;padding:7px 8px;border-bottom:1px solid var(--line);font-weight:700}
+  td{padding:5px 8px;text-align:center;color:var(--txt);font-variant-numeric:tabular-nums}
+  tbody tr:nth-child(odd){background:var(--stripe)}
+  td.l{text-align:left;color:var(--muted)}
+  .empty{padding:22px;text-align:center;color:var(--faint);font-size:12px}
+  .chip{display:inline-block;padding:2px 9px;border-radius:11px;font-size:11px;font-weight:700;color:#0f151c}
+  .rectable{overflow:auto}
+  #recTable th[data-k]{cursor:pointer;user-select:none}
+  #recTable th[data-k]:hover{color:var(--accent)}
+  .ei{min-width:0!important;width:100%;padding:4px 6px;font-size:12px}
+  .ei.dia{min-width:120px}
+  .iact{display:inline-flex;gap:4px;justify-content:center}
+  .ibtn{background:none;border:1px solid var(--line);border-radius:5px;cursor:pointer;padding:2px 7px;font-size:12px;font-weight:700;line-height:1.3}
+  .ibtn.ed{color:var(--accent2)}
+  .ibtn.del{color:#e76f51}
+  .ibtn.ok{color:#4caf72;border-color:#4caf72}
+  .ibtn:hover{border-color:var(--accent)}
+
+  footer{margin-top:22px;padding-top:12px;border-top:1px solid var(--line);color:var(--faint);font-size:11px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+  @media(max-width:960px){.kpis{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
   @media(max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
-  .kpi{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:11px 12px;position:relative;overflow:hidden}
-  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--navy-2)}
-  .kpi.k-ok::before{background:var(--ok)} .kpi.k-warn::before{background:var(--warn)} .kpi.k-risk::before{background:var(--risk)} .kpi.k-info::before{background:var(--info)} .kpi.k-gold::before{background:var(--gold)}
-  .kpi .kl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
-  .kpi .kv{font-size:20px;font-weight:800;color:var(--navy);font-family:var(--mono);margin-top:3px;letter-spacing:-.5px}
-  .kpi .ks{font-size:11px;color:var(--muted-2);margin-top:1px;font-family:var(--mono)}
-  .kpi .kv.pos{color:var(--ok)} .kpi .kv.neg{color:var(--risk)}
-  .bar{height:6px;border-radius:4px;background:var(--line-2);margin-top:7px;position:relative;overflow:hidden}
-  .bar>i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--navy-2);display:block}
-  .bar>.mark{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--gold)}
-  .chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.3px}
-  .chip.ok{background:var(--ok-bg);color:var(--ok)} .chip.warn{background:var(--warn-bg);color:var(--warn)} .chip.risk{background:var(--risk-bg);color:var(--risk)} .chip.info{background:var(--info-bg);color:var(--info)} .chip.muted{background:#eef1f5;color:var(--muted)}
-  .dot{width:8px;height:8px;border-radius:50%;background:currentColor}
-
-  /* ---------- Comparison table (TN) ---------- */
-  table.tbl{width:100%;border-collapse:collapse;font-size:13px}
-  table.tbl th{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700;text-align:right;padding:8px 10px;border-bottom:1px solid var(--line)}
-  table.tbl th:first-child{text-align:left}
-  table.tbl td{padding:6px 10px;border-bottom:1px solid var(--line-2);text-align:right;font-family:var(--mono);font-size:13px}
-  table.tbl td:first-child{text-align:left;font-family:var(--sans);color:var(--muted);font-weight:600}
-  table.tbl tr.total td{font-weight:800;color:var(--navy);border-top:1.5px solid var(--line)}
-  table.tbl input.inp{padding:5px 8px;text-align:right;font-family:var(--mono);max-width:160px;margin-left:auto}
-  table.tbl .cellpct{color:var(--muted-2)}
-
-  /* ---------- Repeatable rows ---------- */
-  .rows{display:flex;flex-direction:column;gap:8px}
-  .row-item{display:grid;gap:8px;align-items:start;background:#fafbfc;border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:9px 10px}
-  .row-item .rm{align-self:center}
-  .row-tc{grid-template-columns:110px 130px 1fr 140px 36px}
-  .row-tcp{grid-template-columns:100px 120px 140px 1fr 36px}
-  .row-wk{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px}
-  .row-wk .wk-stat{width:11px;height:11px;border-radius:50%;background:var(--muted-2);flex:none;transition:background .15s,box-shadow .15s}
-  .row-wk .wk-stat[data-stat=ok]{background:var(--ok);box-shadow:0 0 0 3px rgba(46,125,79,.15)}
-  .row-wk .wk-stat[data-stat=warn]{background:var(--warn);box-shadow:0 0 0 3px rgba(201,146,42,.15)}
-  .row-wk .wk-stat[data-stat=risk]{background:var(--risk);box-shadow:0 0 0 3px rgba(192,57,43,.20)}
-  .row-wk .wk-stat[data-stat=muted]{background:var(--muted-2)}
-  .row-wk .wk-desc-input{flex:1 1 260px;min-width:0}
-  .row-wk .wk-toggles{display:flex;gap:8px;flex:none;flex-wrap:wrap}
-  .row-wk .iconbtn{flex:none}
-  .wk-check{display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:var(--muted);padding:7px 11px;border:1px solid var(--line);border-radius:6px;background:#fff;font-weight:600;user-select:none;transition:.12s;white-space:nowrap}
-  .wk-check:hover{border-color:var(--navy-2)}
-  .wk-check input{margin:0;cursor:pointer;accent-color:var(--navy-2);width:14px;height:14px}
-  .wk-check:has(input:checked){background:#eef4fb;border-color:var(--navy-2);color:var(--navy)}
-  .wk-sum{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:11px;border-top:1px dashed var(--line);min-height:1px}
-  .wk-sum:empty{border-top:0;padding-top:0;margin-top:0}
-  .row-pe{grid-template-columns:90px 110px 1fr 1fr 36px}
-  .row-wk{grid-template-columns:1fr 150px 36px}
-  .row-tm{grid-template-columns:110px 1fr 80px 180px 110px 110px 36px}
-  .row-tm .chk-yn{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--brd);border-radius:6px;background:#fff;font-size:13px;cursor:pointer;user-select:none}
-  .row-tm .chk-yn input{margin:0;width:14px;height:14px;cursor:pointer}
-  .row-tm .chk-yn .chk-label{font-weight:600;color:var(--navy)}
-  body.lang-en .row-tm .chk-yn{cursor:default;background:#fafbfc;color:#555}
-  body.lang-en .row-tm .chk-yn input{cursor:default}
-  @media(max-width:820px){.row-tc,.row-tcp,.row-pe,.row-tm{grid-template-columns:1fr}}
-  .row-item .micro{font-size:9.5px;color:var(--muted-2);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;display:block}
-  .iconbtn{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
-  .iconbtn:hover{color:var(--risk);border-color:#f0cfca;background:var(--risk-bg)}
-  .add-row{margin-top:10px}
-  .empty{font-size:12.5px;color:var(--muted-2);font-style:italic;padding:6px 2px}
-  .sumline{display:flex;flex-wrap:wrap;gap:18px;margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
-  .sumline .it{font-size:12px;color:var(--muted)}
-  .sumline .it b{font-family:var(--mono);font-size:14px;color:var(--navy);display:block}
-
-  /* ---------- Feeling selector ---------- */
-  .feel{display:flex;gap:8px;flex-wrap:wrap}
-  .feel label{flex:1;min-width:120px;border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:9px 11px;cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;color:var(--muted);background:#fff}
-  .feel input{display:none}
-  .feel label .dot{flex:none}
-  .feel label.f-ok{--c:var(--ok)} .feel label.f-warn{--c:var(--warn)} .feel label.f-risk{--c:var(--risk)}
-  .feel label .dot{background:var(--c)}
-  .feel input:checked + .dot{}
-  .feel label:has(input:checked){border-color:var(--c);color:var(--c);background:color-mix(in srgb,var(--c) 8%,#fff)}
-
-  /* ---------- History drawer ---------- */
-  .hist{position:fixed;top:0;right:0;bottom:0;width:380px;max-width:90vw;background:#fff;border-left:1px solid var(--line);box-shadow:-8px 0 30px rgba(20,35,60,.12);transform:translateX(100%);transition:.22s;z-index:60;display:flex;flex-direction:column}
-  .hist.open{transform:none}
-  .hist .hh{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
-  .hist .hh h3{margin:0;font-size:14px;color:var(--navy)}
-  .hist .hl{flex:1;overflow:auto;padding:10px 12px}
-  .hrec{border:1px solid var(--line);border-radius:var(--radius-sm);padding:10px 11px;margin-bottom:9px;cursor:pointer;transition:.12s}
-  .hrec:hover{border-color:var(--navy-2);box-shadow:var(--shadow)}
-  .hrec.active{border-color:var(--gold);background:#fdf8ee}
-  .hrec .ht{font-weight:700;font-size:13px;color:var(--navy);display:flex;justify-content:space-between;gap:6px}
-  .hrec .hsub{font-size:11.5px;color:var(--muted);margin-top:2px}
-  .hrec .hact{display:flex;gap:6px;margin-top:8px}
-  .scrim{position:fixed;inset:0;background:rgba(20,35,60,.35);z-index:55;opacity:0;pointer-events:none;transition:.2s}
-  .scrim.on{opacity:1;pointer-events:auto}
-
-  .meta-strip{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:12px;color:var(--muted);margin-top:6px}
-  .ov-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
-  body:not(.editing) #editor{display:none}
-  body:not(.editing) .edit-only{display:none}
-  body.editing #sec-ov{display:none}
-  /* Read-only mode in EN: hide mutation buttons, gray out inputs */
-  body.lang-en .btn-gold,
-  body.lang-en .btn-navy,
-  body.lang-en .btn-danger,
-  body.lang-en .add-row,
-  body.lang-en .delx,
-  body.lang-en .clone-btn { display:none !important; }
-  body.lang-en input[readonly],
-  body.lang-en textarea[readonly],
-  body.lang-en select[disabled],
-  body.lang-en input:disabled { background:#fafbfc !important; color:#555; cursor:default; border-color:#e3e6ec !important; }
-  body.lang-en .ro-banner { display:flex; align-items:center; gap:8px; padding:8px 14px; margin:0 0 12px; background:#fff7e6; border:1px solid #f5c97a; border-radius:8px; font-size:12px; color:#7a5a0f; }
-  body.lang-pt .ro-banner { display:none; }
-  .ovt tbody tr.ovrow{cursor:pointer;transition:.1s}
-  .ovt tbody tr.ovrow:hover td{background:#f4f8fc}
-  .ovt tbody tr.ovrow.active td{background:#fdf8ee}
-  .ovt td{padding:8px 10px;border-bottom:1px solid var(--line-2)}
-  .ovt th{cursor:default}
-  .meta-strip b{color:var(--navy)}
-  .req{color:var(--risk)}
-  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(20,35,60,.25);opacity:0;pointer-events:none;transition:.25s;z-index:90}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-  @media print{
-    .nav,.toolbar,.hist,.scrim,.add-row,.iconbtn,.sec-head .chev,.feel input{display:none!important}
-    body{background:#fff;font-size:11px}
-    .wrap{max-width:100%;padding:0}
-    .sec.collapsed .sec-body{display:block!important}
-    .card{box-shadow:none;border-color:#ccc;break-inside:avoid;margin-bottom:8px}
-    .inp,textarea.inp,select.inp{border-color:#ddd}
-    .kpis{grid-template-columns:repeat(6,1fr)}
-  }
+  @media print{body{background:#fff;color:#000}.btn,.filters,.theme{display:none}#gate{display:none!important}details.sec[open]>summary::before{display:none}}
 </style>
 </head>
 <body>
 
-<div class="nav">
-  <div class="brand">
-    <div class="logo">V</div>
-    <div class="ttl"><span data-i18n="app.title">Velocity</span><small data-i18n="app.sub">Controlo de Empreitada · Aceitar</small><small class="ver-line" id="ver-line">v26.07.06.1428</small></div>
+<div id="gate">
+  <div class="login">
+    <div class="eyebrow">Esporão Sul de Espinho</div>
+    <h1>Acesso restrito</h1>
+    <label>Utilizador</label>
+    <input id="gu" type="text" autocomplete="username" autofocus>
+    <label>Palavra-passe</label>
+    <input id="gp" type="password" autocomplete="current-password">
+    <button id="gbtn">Entrar</button>
+    <div class="err" id="gerr"></div>
   </div>
-  <div class="spacer"></div>
-  <label class="nav-deploy" id="btn-deploy" title="Deploy para GitHub / Vercel">🚀 Deploy
-    <input type="file" accept=".html,.sql" style="display:none" onchange="deployToGitHub(this)">
-  </label>
-  <div class="btn-lang">
-    <button id="lang-pt" class="on" onclick="setLang('pt')">PT</button>
-    <button id="lang-en" onclick="setLang('en')">EN</button>
-  </div>
-  <span id="sb-dot" class="sb-dot" title="Supabase"></span>
-  <span class="badge-ver" id="ver-badge">v26.07.06.1428</span>
 </div>
 
-<div class="wrap">
+<div class="wrap" id="app" style="display:none">
 
-  <!-- Toolbar -->
-  <div class="toolbar">
-    <button class="btn btn-gold" onclick="newReport()">＋ <span data-i18n="tb.new">Novo período</span></button>
-    <button class="btn btn-out clone-btn" onclick="cloneLast()" data-i18n="tb.clone">Criar a partir do último</button>
-    <div class="grow"></div>
-    <button class="btn btn-ghost btn-sm edit-only" onclick="exportJSON()" data-i18n="tb.export">Exportar JSON</button>
-    <button class="btn btn-ghost btn-sm edit-only" onclick="window.print()" data-i18n="tb.print">Imprimir / PDF</button>
-    <button class="btn btn-out" onclick="openHist()">🗂 <span data-i18n="tb.hist">Histórico</span> (<span id="hist-count">0</span>)</button>
-    <button class="btn btn-navy edit-only" onclick="saveReport()" data-i18n="tb.save">Guardar</button>
+  <header>
+    <div>
+      <div class="eyebrow">Empreitada de Reabilitação do Esporão Sul de Espinho</div>
+      <h1>Remoção e Colocação de Tetrápodes</h1>
+      <div class="sub">Listagem por perfil &middot; Dashboard de acompanhamento</div>
+    </div>
+    <div class="htools">
+      <div class="theme">
+        <button data-th="light">Claro</button>
+        <button data-th="dark">Escuro</button>
+        <button data-th="system">Sistema</button>
+      </div>
+      <div class="badge">v26.07.06.1430</div>
+    </div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="filters">
+    <div class="fgroup"><span class="flabel">Semana</span><select id="fSemana"></select></div>
+    <div class="fgroup"><span class="flabel">Dia</span><input type="date" id="fDia"></div>
+    <div class="fgroup"><span class="flabel">Tipo</span><select id="fTipo"></select></div>
+    <div class="fgroup"><span class="flabel">Sub Tipo</span><select id="fSub"></select></div>
+    <button class="btn" id="reset">Limpar</button>
+    <button class="btn spacer" id="csv">Exportar CSV</button>
   </div>
 
-  <!-- Vistas por Obra -->
-  <section class="card sec" id="sec-ov">
-    <div class="sec-head" onclick="toggleSec(this)">
-      <div class="n">▦</div>
-      <h2 data-i18n="ov.title">Relatórios por Obra</h2>
-      <span class="sub" data-i18n="ov.sub">Consultar e abrir períodos guardados</span>
-      <span class="chev">▾</span>
-    </div>
-    <div class="sec-body">
-      <div class="ov-bar">
-        <label class="lab" style="margin:0" data-i18n="ov.filter">Obra</label>
-        <select class="inp" id="ov-obra" style="max-width:340px" onchange="ovFilter=this.value;renderObraView()"></select>
-        <div style="flex:1"></div>
-        <button class="btn btn-out btn-sm" onclick="refreshDB()">↻ <span data-i18n="ov.refresh">Atualizar</span></button>
+  <details class="sec" id="secRec">
+    <summary>Registos <span class="count" id="regCount"></span></summary>
+    <div class="secbody">
+      <div class="recform">
+        <div class="fgroup"><span class="flabel">Dia</span><input type="date" id="rDia"></div>
+        <div class="fgroup"><span class="flabel">Semana</span><input type="number" id="rSemana" min="1" max="53" style="min-width:90px"></div>
+        <div class="fgroup"><span class="flabel">Tipo</span><select id="rTipo"><option>Remoção</option><option>Colocação</option></select></div>
+        <div class="fgroup"><span class="flabel">Sub Tipo</span><select id="rSub"><option>Inteiros</option><option>Partidos</option></select></div>
+        <div class="fgroup"><span class="flabel">Perfil</span><select id="rPerfil"><option>P1</option><option>P2</option><option>P3</option><option>P4</option><option>P5</option></select></div>
+        <div class="fgroup"><span class="flabel">Quant</span><input type="number" id="rQuant" min="1" value="1" style="min-width:80px"></div>
+        <button class="btn amber" id="rAdd">Adicionar</button>
       </div>
-      <div id="ov-table"></div>
+      <div class="rectable">
+        <table id="recTable">
+          <thead><tr>
+            <th data-k="Data">Dia</th><th data-k="Semana">Semana</th>
+            <th data-k="Tipo">Tipo</th><th data-k="SubTipo">Sub Tipo</th>
+            <th data-k="Perfil">Perfil</th><th data-k="Quant">Quant</th>
+            <th>Ações</th>
+          </tr></thead>
+          <tbody id="recBody"></tbody>
+        </table>
+      </div>
     </div>
-  </section>
+  </details>
 
-  <!-- Editor (KPIs + form sections) — only visible when editing -->
-  <div id="editor">
-    <div class="ro-banner" data-i18n="ro.banner">Read-only mode — switch to PT to edit. Content is auto-translated.</div>
+  <details class="sec" id="secPerf">
+    <summary>Listagem por Perfil</summary>
+    <div class="secbody"><div class="perfis" id="perfis"></div></div>
+  </details>
 
-  <!-- Dashboard -->
+  <div class="grid">
+    <div class="card">
+      <h2>Evolução Temporal</h2>
+      <div class="toggle">
+        <button class="btn active" data-mode="cum">Acumulado</button>
+        <button class="btn" data-mode="day">Por dia</button>
+      </div>
+      <div class="chartbox" id="chartTime"></div>
+    </div>
+    <div class="card">
+      <h2>Distribuição por Perfil</h2>
+      <div class="chartbox" id="chartPerfil"></div>
+    </div>
+  </div>
+
   <div class="card">
-    <div class="sec-body" style="padding:13px 14px">
-      <div class="kpis" id="kpis"></div>
-    </div>
+    <h2>Quantidade por Semana e Perfil</h2>
+    <div id="chartSemana"></div>
   </div>
 
-  <!-- 0 · Identificação -->
-  <section class="card sec" id="sec-meta">
-    <div class="sec-head" onclick="toggleSec(this)">
-      <div class="n">ID</div>
-      <h2 data-i18n="s0.h">Identificação &amp; Período</h2>
-      <span class="sub" id="meta-sub"></span>
-      <span class="chev">▾</span>
-    </div>
-    <div class="sec-body">
-      <div class="grid g3">
-        <div class="field"><label class="lab" data-i18n="s0.data">Data <span class="req">*</span></label><input class="inp" type="date" id="m-data"></div>
-        <div class="field"><label class="lab" data-i18n="s0.obra">Obra <span class="req">*</span></label><input class="inp" id="m-obra" data-i18n-ph="s0.obra.ph" placeholder="Designação / código da obra"></div>
-        <div class="field"><label class="lab" data-i18n="s0.autor">Autor</label><input class="inp" id="m-autor" data-i18n-ph="s0.autor.ph" placeholder="Nome do responsável"></div>
-      </div>
-      <div class="grid g3" style="margin-top:12px">
-        <div class="field"><label class="lab" data-i18n="s0.ptipo">Periodicidade</label>
-          <select class="inp" id="m-ptipo">
-            <option value="semanal" data-i18n="s0.ptipo.w">Semanal</option>
-            <option value="quinzenal" data-i18n="s0.ptipo.b">Quinzenal</option>
-            <option value="mensal" data-i18n="s0.ptipo.m">Mensal</option>
-            <option value="outro" data-i18n="s0.ptipo.o">Outro</option>
-          </select>
-        </div>
-        <div class="field"><label class="lab" data-i18n="s0.pini">Período — início</label><input class="inp" type="date" id="m-pini"></div>
-        <div class="field"><label class="lab" data-i18n="s0.pfim">Período — fim</label><input class="inp" type="date" id="m-pfim"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 1 · Trabalhos Normais -->
-  <section class="card sec" id="sec-tn">
-    <div class="sec-head" onclick="toggleSec(this)">
-      <div class="n">1</div>
-      <h2 data-i18n="s1.h">Trabalhos Normais</h2>
-      <span class="sub" data-i18n="s1.sub">Execução vs. Cronograma Financeiro</span>
-      <span class="chev">▾</span>
-    </div>
-    <div class="sec-body">
-      <table class="tbl">
-        <thead><tr>
-          <th data-i18n="s1.col.rub">Rubrica</th>
-          <th data-i18n="s1.col.abs">Valor absoluto (€)</th>
-          <th data-i18n="s1.col.rel">Relativo (%)</th>
-        </tr></thead>
-        <tbody>
-          <tr><td data-i18n="s1.total">Total Contratado</td>
-              <td><input class="inp money" type="text" inputmode="decimal" id="tn-total" oninput="recalc()"></td>
-              <td class="cellpct">100%</td></tr>
-          <tr><td data-i18n="s1.trabAnt">Trabalhos Anteriores Efetuados</td>
-              <td><input class="inp money" type="text" inputmode="decimal" id="tn-trab-ant" oninput="recalc()"></td>
-              <td class="cellpct" id="tn-trab-ant-pct">—</td></tr>
-          <tr><td data-i18n="s1.admDir">Administração Direta</td>
-              <td><input class="inp money" type="text" inputmode="decimal" id="tn-adm-dir" oninput="recalc()"></td>
-              <td class="cellpct" id="tn-adm-dir-pct">—</td></tr>
-          <tr class="total"><td data-i18n="s1.aberto">Total Em Aberto</td>
-              <td id="tn-em-aberto">—</td>
-              <td class="cellpct" id="tn-em-aberto-pct">—</td></tr>
-          <tr><td data-i18n="s1.custoExtra">Custo Extra</td>
-              <td id="tn-custo-extra">—</td>
-              <td class="cellpct" id="tn-custo-extra-pct">—</td></tr>
-          <tr><td data-i18n="s1.novoContr">Total Novo Contrato</td>
-              <td><input class="inp money" type="text" inputmode="decimal" id="tn-novo-contr" oninput="recalc()"></td>
-              <td class="cellpct" id="tn-novo-contr-pct">—</td></tr>
-          <tr><td data-i18n="s1.tn">Trabalhos Normais</td>
-              <td><input class="inp money" type="text" inputmode="decimal" id="tn-exec" oninput="recalc()"></td>
-              <td class="cellpct" id="tn-exec-pct">—</td></tr>
-          <tr><td data-i18n="s1.falta">Falta Executar</td>
-              <td id="tn-falta">—</td>
-              <td class="cellpct" id="tn-falta-pct">—</td></tr>
-          <tr><td data-i18n="s1.cron">Previsto no Cronograma (até à data)</td>
-              <td><input class="inp money" type="text" inputmode="decimal" id="tn-cron" oninput="recalc()"></td>
-              <td class="cellpct" id="tn-cron-pct">—</td></tr>
-          <tr class="total"><td data-i18n="s1.desvio">Desvio (Trab. Normais − Cronograma)</td>
-              <td id="tn-desvio">—</td>
-              <td id="tn-desvio-pct">—</td></tr>
-        </tbody>
-      </table>
-      <div class="field" style="margin-top:12px"><label class="lab" data-i18n="s1.nota">Nota de execução</label><textarea class="inp" id="tn-nota" data-i18n-ph="s1.nota.ph" placeholder="Comentário sobre o ritmo de execução face ao previsto…"></textarea></div>
-    </div>
-  </section>
-
-  <!-- 2 · Trabalhos Complementares -->
-  <section class="card sec" id="sec-tc">
-    <div class="sec-head" onclick="toggleSec(this)">
-      <div class="n">2</div>
-      <h2 data-i18n="s2.h">Trabalhos Complementares</h2>
-      <span class="sub" data-i18n="s2.sub">Aprovados &amp; pendentes · peso sobre TN contratado e executado</span>
-      <span class="chev">▾</span>
-    </div>
-    <div class="sec-body">
-      <table class="tbl">
-        <thead><tr>
-          <th data-i18n="s1.col.rub">Rubrica</th>
-          <th data-i18n="s1.col.abs">Valor absoluto (€)</th>
-          <th data-i18n="s2.col.pct1">% s/ TN contratado</th>
-          <th data-i18n="s2.col.pct2">% s/ TN executado</th>
-        </tr></thead>
-        <tbody>
-          <tr><td data-i18n="s2.aprov">Aprovados</td>
-              <td><input class="inp money" type="text" inputmode="decimal" id="tc-aprov-val" oninput="recalc()"></td>
-              <td class="cellpct" id="tc-aprov-pct-tot">—</td>
-              <td class="cellpct" id="tc-aprov-pct-exec">—</td></tr>
-          <tr><td data-i18n="s2.pend">Pendentes</td>
-              <td><input class="inp money" type="text" inputmode="decimal" id="tc-pend-val" oninput="recalc()"></td>
-              <td class="cellpct" id="tc-pend-pct-tot">—</td>
-              <td class="cellpct">—</td></tr>
-          <tr class="total">
-            <td data-i18n="s2.total">Total TC</td>
-            <td id="tc-total-val">—</td>
-            <td id="tc-total-pct-tot">—</td>
-            <td id="tc-total-pct-exec">—</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <label class="lab" style="margin:18px 0 8px;display:block" data-i18n="s2.detail">Pendentes — detalhe</label>
-      <div class="rows" id="tcp-rows"></div>
-      <button class="btn btn-out btn-sm add-row" onclick="addTcp()">＋ <span data-i18n="s2.add.tcp">Adicionar pendente</span></button>
-    </div>
-  </section>
-
-  <!-- 3 · Financeiro -->
-  <section class="card sec" id="sec-fin">
-    <div class="sec-head" onclick="toggleSec(this)">
-      <div class="n">3</div>
-      <h2 data-i18n="s3.h">Valores Pagos &amp; em Dívida</h2>
-      <span class="chev">▾</span>
-    </div>
-    <div class="sec-body">
-      <div class="grid g3">
-        <div class="field"><label class="lab" data-i18n="s3.pagos">Valores pagos (€)</label><input class="inp money" type="text" inputmode="decimal" id="fin-pagos" oninput="recalc()"></div>
-        <div class="field"><label class="lab" data-i18n="s3.divida">Valores em dívida (€)</label><input class="inp money" type="text" inputmode="decimal" id="fin-divida" oninput="recalc()"></div>
-        <div class="field"><label class="lab" data-i18n="s3.nota">Nota</label><input class="inp" id="fin-nota" data-i18n-ph="s3.nota.ph" placeholder="Autos pendentes, retenções…"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 4 · Prazos & Feeling -->
-  <section class="card sec" id="sec-prazo">
-    <div class="sec-head" onclick="toggleSec(this)">
-      <div class="n">4</div>
-      <h2 data-i18n="s4.h">Prazos &amp; Avaliação da Fiscalização</h2>
-      <span class="chev">▾</span>
-    </div>
-    <div class="sec-body">
-      <div class="grid g3">
-        <div class="field"><label class="lab" data-i18n="s4.concl">Prazo previsto para conclusão</label><input class="inp" type="date" id="pz-concl" oninput="recalc()"></div>
-        <div class="field"><label class="lab" data-i18n="s4.baliz">Prazo do balizamento (contratual)</label><input class="inp" type="date" id="pz-baliz" oninput="recalc()"></div>
-        <div class="field"><label class="lab" data-i18n="s4.fisc">Prazo Fiscalização</label><input class="inp" type="date" id="pz-fisc" oninput="recalc()"></div>
-      </div>
-      <div class="field" style="margin-top:14px"><label class="lab" data-i18n="s4.feel">Feeling da Fiscalização</label>
-        <div class="feel" id="feel">
-          <label class="f-ok"><input type="radio" name="feel" value="ok" onchange="recalc()"><span class="dot"></span><span data-i18n="s4.feel.ok">Favorável · no prazo</span></label>
-          <label class="f-warn"><input type="radio" name="feel" value="warn" onchange="recalc()"><span class="dot"></span><span data-i18n="s4.feel.warn">Atenção · em risco</span></label>
-          <label class="f-risk"><input type="radio" name="feel" value="risk" onchange="recalc()"><span class="dot"></span><span data-i18n="s4.feel.risk">Crítico · atrasado</span></label>
-        </div>
-      </div>
-      <div class="field" style="margin-top:12px"><label class="lab" data-i18n="s4.feelnota">Fundamentação</label><textarea class="inp" id="pz-nota" data-i18n-ph="s4.feelnota.ph" placeholder="Justificação do feeling, fatores de risco para o prazo…"></textarea></div>
-    </div>
-  </section>
-
-  <!-- 5 · Trabalhos previstos e em curso -->
-  <section class="card sec" id="sec-wk">
-    <div class="sec-head" onclick="toggleSec(this)">
-      <div class="n">5</div>
-      <h2 data-i18n="s5.h">Trabalhos Previstos e em Curso</h2>
-      <span class="sub" data-i18n="s5.sub">Cruzamento Previsto × Em Curso para detetar frentes fora do plano</span>
-      <span class="chev">▾</span>
-    </div>
-    <div class="sec-body">
-      <div class="rows" id="wk-rows"></div>
-      <button class="btn btn-out btn-sm add-row" onclick="addWK()">＋ <span data-i18n="s5.add">Adicionar frente de trabalho</span></button>
-      <div class="wk-sum" id="wk-summary"></div>
-    </div>
-  </section>
-
-  <!-- 6 · Temas da Fiscalização -->
-  <section class="card sec" id="sec-tm">
-    <div class="sec-head" onclick="toggleSec(this)">
-      <div class="n">6</div>
-      <h2 data-i18n="s6.h">Temas Efetuados pela Fiscalização</h2>
-      <span class="chev">▾</span>
-    </div>
-    <div class="sec-body">
-      <div class="rows" id="tm-rows"></div>
-      <button class="btn btn-out btn-sm add-row" onclick="addTM()">＋ <span data-i18n="s6.add">Adicionar tema</span></button>
-    </div>
-  </section>
-
-  <!-- 7 · Pendentes -->
-  <section class="card sec" id="sec-pend">
-    <div class="sec-head" onclick="toggleSec(this)">
-      <div class="n">7</div>
-      <h2 data-i18n="s7.h">Situações Pendentes</h2>
-      <span class="sub" data-i18n="s7.sub">Pedidos de Esclarecimento &amp; Pedidos de Aprovação</span>
-      <span class="chev">▾</span>
-    </div>
-    <div class="sec-body">
-      <label class="lab" style="margin-bottom:8px" data-i18n="s7.pe">Pedidos de Esclarecimento (PE)</label>
-      <div class="rows" id="pe-rows"></div>
-      <button class="btn btn-out btn-sm add-row" onclick="addPE()">＋ <span data-i18n="s7.pe.add">Adicionar pedido de esclarecimento</span></button>
-
-      <label class="lab" style="margin:20px 0 8px" data-i18n="s7.pa">Pedidos de Aprovação (PA)</label>
-      <div class="rows" id="pa-rows"></div>
-      <button class="btn btn-out btn-sm add-row" onclick="addPA()">＋ <span data-i18n="s7.pa.add">Adicionar pedido de aprovação</span></button>
-    </div>
-  </section>
-
-  <!-- 8 · Observações gerais -->
-  <section class="card sec" id="sec-obs">
-    <div class="sec-head" onclick="toggleSec(this)">
-      <div class="n">8</div>
-      <h2 data-i18n="s8.h">Observações Gerais</h2>
-      <span class="chev">▾</span>
-    </div>
-    <div class="sec-body">
-      <textarea class="inp" id="obs-gerais" style="min-height:90px" data-i18n-ph="s8.ph" placeholder="Notas finais, conclusões e recomendações do período…"></textarea>
-    </div>
-  </section>
-
-  </div><!-- /#editor -->
-
+  <footer>
+    <span>Fiscalização &middot; Aceitar Sucessos, Lda.</span>
+    <span id="fnote"></span>
+  </footer>
 </div>
-
-<!-- History -->
-<div class="scrim" id="scrim" onclick="closeHist()"></div>
-<aside class="hist" id="hist">
-  <div class="hh">
-    <h3 data-i18n="hist.h">Histórico de períodos</h3>
-    <div class="grow" style="flex:1"></div>
-    <button class="btn btn-ghost btn-sm" onclick="closeHist()">✕</button>
-  </div>
-  <div class="hl" id="hist-list"></div>
-</aside>
-
-<div class="toast" id="toast"></div>
 
 <script>
-/* ============================ i18n ============================ */
-const I18N={
- pt:{
-  "app.title":"Velocity","app.sub":"Controlo de Empreitada · Aceitar",
-  "tb.new":"Novo período","tb.clone":"Criar a partir do último","tb.export":"Exportar JSON","tb.print":"Imprimir / PDF","tb.hist":"Histórico","tb.save":"Guardar",
-  "ro.banner":"Modo de leitura — o conteúdo está auto-traduzido. Muda para PT para editar.",
-  "s0.h":"Identificação & Período","s0.data":"Data","s0.obra":"Obra","s0.obra.ph":"Designação / código da obra","s0.autor":"Autor","s0.autor.ph":"Nome do responsável",
-  "s0.ptipo":"Periodicidade","s0.ptipo.w":"Semanal","s0.ptipo.b":"Quinzenal","s0.ptipo.m":"Mensal","s0.ptipo.o":"Outro","s0.pini":"Período — início","s0.pfim":"Período — fim",
-  "s1.h":"Trabalhos Normais","s1.sub":"Execução vs. Cronograma Financeiro","s1.col.rub":"Rubrica","s1.col.abs":"Valor absoluto (€)","s1.col.rel":"Relativo (%)",
-  "s1.total":"Total Contratado","s1.trabAnt":"Trabalhos Anteriores Efetuados","s1.admDir":"Administração Direta","s1.aberto":"Total Em Aberto","s1.custoExtra":"Custo Extra","s1.novoContr":"Total Novo Contrato",
-  "s1.tn":"Trabalhos Normais","s1.falta":"Falta Executar","s1.cron":"Previsto no Cronograma (até à data)","s1.desvio":"Desvio (Trab. Normais − Cronograma)",
-  "s1.nota":"Nota de execução","s1.nota.ph":"Comentário sobre o ritmo de execução face ao previsto…",
-  "s2.h":"Trabalhos Complementares","s2.sub":"Aprovados & pendentes · peso sobre TN contratado e executado",
-  "s2.col.pct1":"% s/ TN contratado","s2.col.pct2":"% s/ TN executado",
-  "s2.aprov":"Aprovados","s2.pend":"Pendentes","s2.total":"Total TC",
-  "s2.detail":"Pendentes — detalhe","s2.add.tcp":"Adicionar pendente","s2.empty":"Sem pendentes registados.",
-  "tcp.id":"Id","tcp.data":"Data início","tcp.valor":"Valor (€)","tcp.desc":"Descrição","tcp.desc.ph":"Descrição do trabalho complementar pendente",
-  "s3.h":"Valores Pagos & em Dívida","s3.pagos":"Valores pagos (€)","s3.divida":"Valores em dívida (€)","s3.nota":"Nota","s3.nota.ph":"Autos pendentes, retenções…",
-  "s4.h":"Prazos & Avaliação da Fiscalização","s4.concl":"Prazo previsto para conclusão","s4.baliz":"Prazo do balizamento (contratual)","s4.fisc":"Prazo Fiscalização","s4.feel":"Feeling da Fiscalização",
-  "s4.feel.ok":"Favorável · no prazo","s4.feel.warn":"Atenção · em risco","s4.feel.risk":"Crítico · atrasado","s4.feelnota":"Fundamentação","s4.feelnota.ph":"Justificação do feeling, fatores de risco para o prazo…",
-  "s5.h":"Trabalhos Previstos e em Curso","s5.sub":"Cruzamento Previsto × Em Curso para detetar frentes fora do plano","s5.add":"Adicionar frente de trabalho","s5.empty":"Sem frentes registadas.",
-  "wk.desc":"Frente / descrição","wk.desc.ph":"Descrição da frente de trabalho","wk.prev":"Previsto","wk.curso":"Em curso",
-  "wk.stat.ok":"No plano","wk.stat.warn":"Por iniciar","wk.stat.risk":"Fora do plano","wk.stat.none":"—",
-  "s6.h":"Temas Efetuados pela Fiscalização","s6.add":"Adicionar tema","tm.data":"Data","tm.desc":"Tema / ação","tm.desc.ph":"Descrição do tema tratado pela Fiscalização","tm.ver":"Versão","tm.ver.ph":"v1","tm.resp":"Responsável","tm.resp.ph":"Nome do responsável","tm.ajuda":"Ajuda DO","tm.done":"Concluído","yes":"Sim","no":"Não",
-  "s7.h":"Situações Pendentes","s7.sub":"Pedidos de Esclarecimento & Pedidos de Aprovação","s7.pe":"Pedidos de Esclarecimento (PE)","s7.pe.add":"Adicionar pedido de esclarecimento","s7.pa":"Pedidos de Aprovação (PA)","s7.pa.add":"Adicionar pedido de aprovação",
-  "pe.id":"Id","pe.data":"Data","pe.desc":"Descrição","pe.motivo":"Motivo","pe.desc.ph":"Descrição","pe.motivo.ph":"Motivo / estado",
-  "s8.h":"Observações Gerais","s8.ph":"Notas finais, conclusões e recomendações do período…",
-  "hist.h":"Histórico de períodos",
-  "ov.title":"Relatórios por Obra","ov.sub":"Consultar e abrir períodos guardados","ov.filter":"Obra","ov.refresh":"Atualizar","ov.refreshed":"Lista atualizada",
-  "ov.all":"Todas as obras","ov.placeholder":"Selecione uma obra…","ov.pick":"Selecione uma obra na lista acima para ver os relatórios guardados.","ov.emptyObra":"Sem períodos guardados para esta obra.",
-  "ov.empty":"Sem relatórios guardados. Clica em + Novo período para criar o primeiro.","ov.open":"Abrir relatório em nova janela","ov.notfound":"Relatório não encontrado.",
-  "ov.col.obra":"Obra","ov.col.per":"Período","ov.col.autor":"Autor","ov.col.exec":"Exec. TN","ov.col.desv":"Desvio","ov.col.feel":"Feeling","ov.col.upd":"Atualizado",
-  "k.exec":"Execução TN","k.desvio":"Desvio","k.tcap":"TC aprovados","k.tcpor":"TC pendentes","k.divida":"Em dívida","k.feel":"Feeling","k.prazo":"dias p/ prazo",
-  "kf.ok":"Favorável","kf.warn":"Atenção","kf.risk":"Crítico","kf.na":"—",
-  "msg.saved":"Período guardado","msg.del":"Período eliminado","msg.need":"Indique Data e Obra antes de guardar","msg.cloned":"Criado a partir do último — atualize a Data e o Período","msg.nolast":"Não existe período anterior para esta obra","msg.new":"Novo período em branco","msg.loaded":"Período carregado","msg.exp":"JSON exportado",
-  "hist.empty":"Sem períodos guardados.","hist.load":"Abrir","hist.del":"Eliminar","confirm.del":"Eliminar este período do histórico?","confirm.new":"Descartar alterações não guardadas e começar um novo período?",
-  "vs":"vs","prev":"prev.","of":"de"
- },
- en:{
-  "app.title":"Velocity","app.sub":"Contract Works Control · Aceitar",
-  "tb.new":"New period","tb.clone":"Create from last","tb.export":"Export JSON","tb.print":"Print / PDF","tb.hist":"History","tb.save":"Save",
-  "ro.banner":"Read-only mode — content is auto-translated. Switch to PT to edit.",
-  "s0.h":"Identification & Period","s0.data":"Date","s0.obra":"Project","s0.obra.ph":"Project name / code","s0.autor":"Author","s0.autor.ph":"Responsible name",
-  "s0.ptipo":"Frequency","s0.ptipo.w":"Weekly","s0.ptipo.b":"Biweekly","s0.ptipo.m":"Monthly","s0.ptipo.o":"Other","s0.pini":"Period — start","s0.pfim":"Period — end",
-  "s1.h":"Normal Works","s1.sub":"Progress vs. Financial Schedule","s1.col.rub":"Item","s1.col.abs":"Absolute value (€)","s1.col.rel":"Relative (%)",
-  "s1.total":"Contracted Total","s1.trabAnt":"Previously Executed Works","s1.admDir":"Direct Administration","s1.aberto":"Open Total","s1.custoExtra":"Extra Cost","s1.novoContr":"New Contract Total",
-  "s1.tn":"Normal Works","s1.falta":"To Be Executed","s1.cron":"Scheduled (to date)","s1.desvio":"Deviation (NW − Scheduled)",
-  "s1.nota":"Execution note","s1.nota.ph":"Comment on execution pace against plan…",
-  "s2.h":"Complementary Works","s2.sub":"Approved & pending · share of contracted and executed NW",
-  "s2.col.pct1":"% over NW contracted","s2.col.pct2":"% over NW executed",
-  "s2.aprov":"Approved","s2.pend":"Pending","s2.total":"Total CW",
-  "s2.detail":"Pending — detail","s2.add.tcp":"Add pending item","s2.empty":"No pending items recorded.",
-  "tcp.id":"Id","tcp.data":"Start date","tcp.valor":"Value (€)","tcp.desc":"Description","tcp.desc.ph":"Pending complementary work description",
-  "s3.h":"Amounts Paid & Outstanding","s3.pagos":"Amounts paid (€)","s3.divida":"Amounts outstanding (€)","s3.nota":"Note","s3.nota.ph":"Pending invoices, retentions…",
-  "s4.h":"Deadlines & Supervision Assessment","s4.concl":"Forecast completion date","s4.baliz":"Baseline (contractual) date","s4.fisc":"Supervision deadline","s4.feel":"Supervision feeling",
-  "s4.feel.ok":"Favourable · on schedule","s4.feel.warn":"Caution · at risk","s4.feel.risk":"Critical · delayed","s4.feelnota":"Rationale","s4.feelnota.ph":"Reasoning for the feeling, schedule risk factors…",
-  "s5.h":"Planned & Ongoing Works","s5.sub":"Planned × Ongoing cross-check to surface off-plan fronts","s5.add":"Add work front","s5.empty":"No fronts recorded.",
-  "wk.desc":"Front / description","wk.desc.ph":"Work front description","wk.prev":"Planned","wk.curso":"Ongoing",
-  "wk.stat.ok":"On plan","wk.stat.warn":"Not started","wk.stat.risk":"Off-plan","wk.stat.none":"—",
-  "s6.h":"Topics Handled by Supervision","s6.add":"Add topic","tm.data":"Date","tm.desc":"Topic / action","tm.desc.ph":"Description of the topic handled by Supervision","tm.ver":"Version","tm.ver.ph":"v1","tm.resp":"Responsible","tm.resp.ph":"Name of responsible","tm.ajuda":"Owner help","tm.done":"Done","yes":"Yes","no":"No",
-  "s7.h":"Pending Items","s7.sub":"Requests for Information & Approval Requests","s7.pe":"Requests for Information (RFI)","s7.pe.add":"Add request for information","s7.pa":"Approval Requests (AR)","s7.pa.add":"Add approval request",
-  "pe.id":"Id","pe.data":"Date","pe.desc":"Description","pe.motivo":"Reason","pe.desc.ph":"Description","pe.motivo.ph":"Reason / status",
-  "s8.h":"General Remarks","s8.ph":"Final notes, conclusions and recommendations for the period…",
-  "hist.h":"Period history",
-  "ov.title":"Reports by Project","ov.sub":"Browse and open saved periods","ov.filter":"Project","ov.refresh":"Refresh","ov.refreshed":"List refreshed",
-  "ov.all":"All projects","ov.placeholder":"Select a project…","ov.pick":"Select a project above to see its saved reports.","ov.emptyObra":"No saved periods for this project.",
-  "ov.empty":"No saved reports yet. Click + New period to create the first one.","ov.open":"Open report in new window","ov.notfound":"Report not found.",
-  "ov.col.obra":"Project","ov.col.per":"Period","ov.col.autor":"Author","ov.col.exec":"NW exec.","ov.col.desv":"Deviation","ov.col.feel":"Feeling","ov.col.upd":"Updated",
-  "k.exec":"NW progress","k.desvio":"Deviation","k.tcap":"CW approved","k.tcpor":"CW pending","k.divida":"Outstanding","k.feel":"Feeling","k.prazo":"days to deadline",
-  "kf.ok":"Favourable","kf.warn":"Caution","kf.risk":"Critical","kf.na":"—",
-  "msg.saved":"Period saved","msg.del":"Period deleted","msg.need":"Enter Date and Project before saving","msg.cloned":"Created from last — update Date and Period","msg.nolast":"No previous period for this project","msg.new":"New blank period","msg.loaded":"Period loaded","msg.exp":"JSON exported",
-  "hist.empty":"No saved periods.","hist.load":"Open","hist.del":"Delete","confirm.del":"Delete this period from history?","confirm.new":"Discard unsaved changes and start a new period?",
-  "vs":"vs","prev":"plan.","of":"of"
- }
-};
-/* ============================ version (single source) ============================ */
-const APP_VER='v26.07.06.1428';
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 
-/* ============================ editor mode ============================ */
-function showEditor(){ document.body.classList.add('editing'); }
-function hideEditor(){ document.body.classList.remove('editing'); }
+const CRED={user:"esporao",pass:"APA"};
+const norm=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+function tryLogin(){
+  const u=norm(document.getElementById("gu").value),p=document.getElementById("gp").value.trim();
+  if(u===CRED.user&&p===CRED.pass){store.set("esporao_auth","1");openApp();}
+  else document.getElementById("gerr").textContent="Credenciais inválidas.";
+}
+function openApp(){document.getElementById("gate").style.display="none";document.getElementById("app").style.display="block";init();}
+document.getElementById("gbtn").onclick=tryLogin;
+document.getElementById("gp").addEventListener("keydown",e=>{if(e.key==="Enter")tryLogin();});
 
-/* ============================ money formatting ============================ */
-// toRaw: strip thousand separators AND any currency symbols (defensive against legacy state
-// that may have been saved with "€" suffix/prefix). Preserves locale decimal.
-function toRaw(v){
-  if(v===''||v==null) return '';
-  let s=String(v).replace(/\s/g,'')             // strip spaces + NBSPs
-                 .replace(/[€$£¥]/g,'');        // strip currency symbols anywhere
-  if(LANG==='pt') s=s.replace(/\./g,'');       // PT: dots are thousand sep, comma stays
-  else            s=s.replace(/,/g,'');        // EN: commas are thousand sep, dot stays
-  return s;
+const mq=window.matchMedia("(prefers-color-scheme: dark)");
+function applyTheme(pref){
+  const r=pref==="system"?(mq.matches?"dark":"light"):pref;
+  document.documentElement.dataset.theme=r;
+  document.querySelectorAll(".theme button").forEach(b=>b.classList.toggle("active",b.dataset.th===pref));
+  store.set("esporao_theme",pref);
 }
-// toFloat: parse to JS number from any locale-formatted string.
-function toFloat(v){
-  if(v===''||v==null) return NaN;
-  let s=toRaw(v);
-  if(LANG==='pt') s=s.replace(',','.');        // PT decimal comma → dot
-  return parseFloat(s);
+let themePref=store.get("esporao_theme")||"system";
+mq.addEventListener("change",()=>{if(themePref==="system")applyTheme("system");});
+
+const SEED_DATA=[
+ {Semana:26,Data:"2026-06-22",Tipo:"Remoção",SubTipo:"Inteiros",Quant:1,Perfil:"P4"},
+ {Semana:26,Data:"2026-06-22",Tipo:"Remoção",SubTipo:"Inteiros",Quant:1,Perfil:"P3"},
+ {Semana:25,Data:"2026-06-17",Tipo:"Remoção",SubTipo:"Inteiros",Quant:5,Perfil:"P4"},
+ {Semana:25,Data:"2026-06-17",Tipo:"Remoção",SubTipo:"Inteiros",Quant:4,Perfil:"P3"},
+ {Semana:25,Data:"2026-06-17",Tipo:"Remoção",SubTipo:"Inteiros",Quant:4,Perfil:"P2"},
+ {Semana:25,Data:"2026-06-17",Tipo:"Remoção",SubTipo:"Inteiros",Quant:1,Perfil:"P1"},
+ {Semana:25,Data:"2026-06-16",Tipo:"Remoção",SubTipo:"Inteiros",Quant:1,Perfil:"P1"},
+ {Semana:25,Data:"2026-06-16",Tipo:"Remoção",SubTipo:"Inteiros",Quant:5,Perfil:"P3"},
+ {Semana:25,Data:"2026-06-16",Tipo:"Remoção",SubTipo:"Inteiros",Quant:4,Perfil:"P2"},
+ {Semana:25,Data:"2026-06-15",Tipo:"Remoção",SubTipo:"Inteiros",Quant:5,Perfil:"P3"},
+ {Semana:25,Data:"2026-06-15",Tipo:"Remoção",SubTipo:"Inteiros",Quant:2,Perfil:"P2"},
+ {Semana:25,Data:"2026-06-12",Tipo:"Remoção",SubTipo:"Inteiros",Quant:7,Perfil:"P2"},
+ {Semana:24,Data:"2026-06-12",Tipo:"Remoção",SubTipo:"Inteiros",Quant:1,Perfil:"P1"},
+ {Semana:24,Data:"2026-06-09",Tipo:"Remoção",SubTipo:"Inteiros",Quant:2,Perfil:"P4"},
+ {Semana:24,Data:"2026-06-09",Tipo:"Remoção",SubTipo:"Inteiros",Quant:3,Perfil:"P4"},
+ {Semana:24,Data:"2026-06-09",Tipo:"Remoção",SubTipo:"Inteiros",Quant:1,Perfil:"P2"},
+ {Semana:26,Data:"2026-06-22",Tipo:"Remoção",SubTipo:"Partidos",Quant:1,Perfil:"P4"},
+ {Semana:26,Data:"2026-06-22",Tipo:"Remoção",SubTipo:"Partidos",Quant:12,Perfil:"P3"},
+ {Semana:26,Data:"2026-06-22",Tipo:"Remoção",SubTipo:"Partidos",Quant:6,Perfil:"P5"},
+ {Semana:25,Data:"2026-06-18",Tipo:"Remoção",SubTipo:"Partidos",Quant:6,Perfil:"P4"},
+ {Semana:25,Data:"2026-06-18",Tipo:"Remoção",SubTipo:"Partidos",Quant:4,Perfil:"P3"},
+ {Semana:25,Data:"2026-06-18",Tipo:"Remoção",SubTipo:"Partidos",Quant:5,Perfil:"P2"},
+ {Semana:25,Data:"2026-06-16",Tipo:"Remoção",SubTipo:"Partidos",Quant:15,Perfil:"P3"},
+ {Semana:25,Data:"2026-06-16",Tipo:"Remoção",SubTipo:"Partidos",Quant:2,Perfil:"P1"},
+ {Semana:25,Data:"2026-06-15",Tipo:"Remoção",SubTipo:"Partidos",Quant:6,Perfil:"P3"},
+ {Semana:25,Data:"2026-06-15",Tipo:"Remoção",SubTipo:"Partidos",Quant:2,Perfil:"P2"},
+ {Semana:24,Data:"2026-06-12",Tipo:"Remoção",SubTipo:"Partidos",Quant:10,Perfil:"P2"},
+ {Semana:24,Data:"2026-06-12",Tipo:"Colocação",SubTipo:"-",Quant:1,Perfil:"P1"}
+];
+
+let records=[],seq=0;
+function loadRecords(){
+  let saved=null;try{saved=JSON.parse(store.get("esporao_records")||"null")}catch(e){}
+  if(saved&&Array.isArray(saved)&&saved.length){records=saved;return;}
+  let mig=[];try{mig=JSON.parse(store.get("esporao_user_records")||"[]")}catch(e){}
+  records=SEED_DATA.concat(mig).map((r,i)=>Object.assign({id:"r"+(i+1)},r));
+  saveRecords();
 }
-// toFloatLang: explicit-locale parser (for lang switching).
-function toFloatLang(v, lang){
-  if(v===''||v==null) return NaN;
-  let s=String(v).replace(/\s/g,'').replace(/[€$£¥]/g,'');
-  if(lang==='pt'){ s=s.replace(/\./g,'').replace(',','.'); }
-  else            { s=s.replace(/,/g,''); }
-  return parseFloat(s);
-}
-function fmtNumDisp(v){
-  if(v===''||v==null) return '';
-  // Parse ALWAYS in PT (state is canonical PT). LANG-aware parsing broke values in EN mode
-  // because "13120,30" parses as EN → "1312030" (thirteen thousand becomes 1.3 million).
-  const n=toFloatLang(v,'pt');
-  if(!isFinite(n)) return String(v);
-  return new Intl.NumberFormat('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:'always'}).format(n);
-}
-// Format a JS number directly (always pt-PT — numeric convention does not translate).
-function fmtNumber(n){
-  if(!isFinite(n)) return '';
-  return new Intl.NumberFormat('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:'always'}).format(n);
-}
-function applyMoneyFormat(){
-  document.querySelectorAll('.inp.money').forEach(el=>{
-    if(document.activeElement===el) return;
-    el.value = el.value===''?'':fmtNumDisp(el.value);
-  });
+function saveRecords(){store.set("esporao_records",JSON.stringify(records))}
+function newId(){return "r"+Date.now()+"_"+(seq++)}
+
+const BASEC={P1:"#4cc9f0",P2:"#4895ef",P3:"#f4a259",P4:"#f07b3f",P5:"#d62828"};
+const EXTRA=["#9b5de5","#00b4a6","#8ac926","#ff70a6","#ffca3a","#118ab2"];
+let PC={};
+const perfisList=()=>[...new Set(records.map(r=>r.Perfil))].sort();
+function buildPC(){let e=0;PC={};perfisList().forEach(p=>PC[p]=BASEC[p]||EXTRA[e++%EXTRA.length])}
+function perfilOptions(sel){return [...new Set(["P1","P2","P3","P4","P5"].concat(perfisList()))].map(p=>`<option ${p===sel?"selected":""}>${p}</option>`).join("")}
+
+const sum=a=>a.reduce((s,x)=>s+x,0);
+const fmtD=s=>{const p=s.split("-");return p[2]+"/"+p[1]};
+function isoWeek(s){const d=new Date(s+"T00:00:00");const t=new Date(d);t.setHours(0,0,0,0);t.setDate(t.getDate()+3-((t.getDay()+6)%7));const w1=new Date(t.getFullYear(),0,4);return 1+Math.round(((t-w1)/86400000-3+((w1.getDay()+6)%7))/7);}
+
+let state={semana:"Todas",dia:"",tipo:"Todos",sub:"Todos",timeMode:"cum",sortK:null,sortDir:1,highlight:null,editId:null};
+
+function filtered(){
+  return records.filter(r=>
+    (state.semana==="Todas"||r.Semana==+state.semana)&&
+    (state.dia===""||r.Data===state.dia)&&
+    (state.tipo==="Todos"||r.Tipo===state.tipo)&&
+    (state.sub==="Todos"||r.SubTipo===state.sub));
 }
 
-let LANG = (localStorage_safe('get','ace_fisc_lang')) || 'pt';
-const t = k => (I18N[LANG][k] ?? k);
-
-/* ============================ storage (safe) ============================ */
-function localStorage_safe(op,key,val){
-  try{
-    if(op==='get') return localStorage.getItem(key);
-    if(op==='set'){ localStorage.setItem(key,val); return true; }
-    if(op==='del'){ localStorage.removeItem(key); return true; }
-  }catch(e){ return null; }
+function buildFilters(){
+  const sem=["Todas"].concat([...new Set(records.map(r=>r.Semana))].sort((a,b)=>a-b));
+  const tip=["Todos"].concat([...new Set(records.map(r=>r.Tipo))]);
+  const sub=["Todos","Inteiros","Partidos"];
+  const fill=(id,arr,cur)=>document.getElementById(id).innerHTML=arr.map(v=>`<option ${v==cur?"selected":""}>${v}</option>`).join("");
+  fill("fSemana",sem,state.semana);fill("fTipo",tip,state.tipo);fill("fSub",sub,state.sub);
+  document.getElementById("fDia").value=state.dia;
 }
-/* ============================ Supabase ============================ */
-const SB={
-  URL:'https://ultrouytgiwyxwyiumak.supabase.co',
-  KEY:'sb_publishable_ie6T1-4TUZCnLcCbfGOULA_myPsPvhK',
-  H(){return{apikey:this.KEY,Authorization:'Bearer '+this.KEY,'Content-Type':'application/json'};},
-  async list(){
-    const r=await fetch(`${this.URL}/rest/v1/relatorios?select=*&order=updated_at.desc`,{headers:this.H()});
-    if(!r.ok) throw new Error('list '+r.status+' '+(await r.text()).slice(0,140));
-    return r.json();
-  },
-  async upsert(row){
-    const r=await fetch(`${this.URL}/rest/v1/relatorios?on_conflict=id`,{
-      method:'POST',
-      headers:{...this.H(),Prefer:'resolution=merge-duplicates,return=representation'},
-      body:JSON.stringify(row)
-    });
-    if(!r.ok) throw new Error('save '+r.status+' '+(await r.text()).slice(0,140));
-    return r.json();
-  },
-  async del(id){
-    const r=await fetch(`${this.URL}/rest/v1/relatorios?id=eq.${encodeURIComponent(id)}`,{method:'DELETE',headers:this.H()});
-    if(!r.ok) throw new Error('del '+r.status+' '+(await r.text()).slice(0,140));
+
+function renderKPIs(){
+  const d=filtered(),v=f=>sum(d.filter(f).map(r=>r.Quant));
+  const cards=[["Total",sum(d.map(r=>r.Quant)),""],["Remoção",v(r=>r.Tipo==="Remoção"),""],
+    ["Colocação",v(r=>r.Tipo==="Colocação"),""],["Partidos",v(r=>r.SubTipo==="Partidos"),"alt"],
+    ["Inteiros",v(r=>r.SubTipo==="Inteiros"),"alt"],["Dias ativos",new Set(d.map(r=>r.Data)).size,"alt"]];
+  document.getElementById("kpis").innerHTML=cards.map(c=>`<div class="kpi ${c[2]}"><div class="v">${c[1]}</div><div class="l">${c[0]}</div></div>`).join("");
+}
+
+function rowView(r){
+  return `<tr>
+    <td class="l">${fmtD(r.Data)}</td><td>${r.Semana}</td><td>${r.Tipo}</td><td>${r.SubTipo}</td>
+    <td><span class="chip" style="background:${PC[r.Perfil]||"#888"}">${r.Perfil}</span></td>
+    <td><b>${r.Quant}</b></td>
+    <td><span class="iact">
+      <button class="ibtn ed" title="Editar" onclick="startEdit('${r.id}')">&#9998;</button>
+      <button class="ibtn del" title="Eliminar" onclick="removeRec('${r.id}')">&times;</button>
+    </span></td></tr>`;
+}
+function rowEdit(r){
+  const col=r.Tipo==="Colocação";
+  return `<tr>
+    <td><input type="date" class="ei dia" id="e_dia" value="${r.Data}" onchange="document.getElementById('e_sem').value=isoWeek(this.value)"></td>
+    <td><input type="number" class="ei" id="e_sem" value="${r.Semana}" style="max-width:64px"></td>
+    <td><select class="ei" id="e_tipo" onchange="onEditTipo()"><option ${r.Tipo==="Remoção"?"selected":""}>Remoção</option><option ${col?"selected":""}>Colocação</option></select></td>
+    <td><select class="ei" id="e_sub" ${col?"disabled":""}><option ${r.SubTipo==="Inteiros"?"selected":""}>Inteiros</option><option ${r.SubTipo==="Partidos"?"selected":""}>Partidos</option></select></td>
+    <td><select class="ei" id="e_perfil">${perfilOptions(r.Perfil)}</select></td>
+    <td><input type="number" class="ei" id="e_quant" min="1" value="${r.Quant}" style="max-width:64px"></td>
+    <td><span class="iact">
+      <button class="ibtn ok" title="Guardar" onclick="saveEdit('${r.id}')">&#10003;</button>
+      <button class="ibtn del" title="Cancelar" onclick="cancelEdit()">&times;</button>
+    </span></td></tr>`;
+}
+function renderRecTable(){
+  let d=filtered().slice();
+  if(state.sortK)d.sort((a,b)=>{const x=a[state.sortK],y=b[state.sortK];return(x>y?1:x<y?-1:0)*state.sortDir;});
+  else d.sort((a,b)=>a.Data<b.Data?1:-1);
+  document.getElementById("regCount").textContent="("+d.length+")";
+  document.getElementById("recBody").innerHTML=d.length
+    ?d.map(r=>r.id===state.editId?rowEdit(r):rowView(r)).join("")
+    :`<tr><td colspan="7" class="empty">Sem registos para os filtros aplicados.</td></tr>`;
+}
+function onEditTipo(){const col=document.getElementById("e_tipo").value==="Colocação";const s=document.getElementById("e_sub");s.disabled=col;s.style.opacity=col?.4:1;}
+function startEdit(id){state.editId=id;renderRecTable();}
+function cancelEdit(){state.editId=null;renderRecTable();}
+function saveEdit(id){
+  const dia=document.getElementById("e_dia").value,q=parseInt(document.getElementById("e_quant").value,10);
+  if(!dia){alert("Indique o dia.");return;}
+  if(!q||q<1){alert("Quantidade inválida.");return;}
+  const tipo=document.getElementById("e_tipo").value,r=records.find(x=>x.id===id);
+  Object.assign(r,{Data:dia,Semana:parseInt(document.getElementById("e_sem").value,10)||isoWeek(dia),
+    Tipo:tipo,SubTipo:tipo==="Colocação"?"-":document.getElementById("e_sub").value,
+    Perfil:document.getElementById("e_perfil").value,Quant:q});
+  state.editId=null;saveRecords();render();
+}
+function removeRec(id){if(!confirm("Eliminar este registo?"))return;records=records.filter(r=>r.id!==id);saveRecords();render();}
+
+function renderTime(){
+  const d=filtered(),dias=[...new Set(d.map(r=>r.Data))].sort();
+  let vals=dias.map(dt=>sum(d.filter(r=>r.Data===dt).map(r=>r.Quant)));
+  if(state.timeMode==="cum"){let c=0;vals=vals.map(v=>c+=v);}
+  const W=700,H=320,pl=42,pr=18,pt=22,pb=42,iw=W-pl-pr,ih=H-pt-pb,max=Math.max(...vals,1);
+  const x=i=>dias.length<2?pl+iw/2:pl+(i/(dias.length-1))*iw,y=v=>pt+ih-(v/max)*ih;
+  let g=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
+  for(let i=0;i<=4;i++){const gv=Math.round(max*i/4),gy=y(gv);
+    g+=`<line x1="${pl}" y1="${gy}" x2="${W-pr}" y2="${gy}" stroke="var(--line)"/><text x="${pl-6}" y="${gy+3}" text-anchor="end" class="glabel">${gv}</text>`;}
+  if(dias.length){
+    g+=`<path d="M ${x(0)} ${y(0)} ${vals.map((v,i)=>`L ${x(i)} ${y(v)}`).join(" ")} L ${x(dias.length-1)} ${y(0)} Z" fill="var(--accent)" opacity="0.12"/>`;
+    g+=`<path d="${vals.map((v,i)=>`${i?"L":"M"} ${x(i)} ${y(v)}`).join(" ")}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>`;
+    vals.forEach((v,i)=>g+=`<circle cx="${x(i)}" cy="${y(v)}" r="3.5" fill="var(--accent)"/><text x="${x(i)}" y="${y(v)-9}" text-anchor="middle" class="gval">${v}</text>`);
+    dias.forEach((dt,i)=>g+=`<text x="${x(i)}" y="${H-14}" text-anchor="middle" class="glabel">${fmtD(dt)}</text>`);
   }
-};
-function sbStatus(s){ const d=document.getElementById('sb-dot'); if(!d) return; d.classList.remove('ok','err','bz'); if(s) d.classList.add(s); }
+  g+=`</svg>`;
+  document.getElementById("chartTime").innerHTML=dias.length?g:`<div class="empty">Sem dados.</div>`;
+}
+function renderPerfil(){
+  const d=filtered(),ps=perfisList();
+  const data=ps.map(p=>({p,q:sum(d.filter(r=>r.Perfil===p).map(r=>r.Quant))}));
+  const max=Math.max(...data.map(o=>o.q),1),W=700,H=320,pl=44,pr=60,pt=16,pb=16,ih=H-pt-pb,rowH=ih/Math.max(data.length,1);
+  let g=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
+  data.forEach((o,i)=>{const yc=pt+i*rowH+rowH/2,bw=(o.q/max)*(W-pl-pr),bh=Math.min(26,rowH*0.55),op=(state.highlight&&state.highlight!==o.p)?0.3:1;
+    g+=`<text x="6" y="${yc+5}" class="glabel" style="fill:${PC[o.p]};font-size:13px">${o.p}</text>`;
+    g+=`<rect x="${pl}" y="${yc-bh/2}" width="${W-pl-pr}" height="${bh}" rx="3" fill="var(--panel2)"/>`;
+    g+=`<rect x="${pl}" y="${yc-bh/2}" width="${bw}" height="${bh}" rx="3" fill="${PC[o.p]}" opacity="${op}"/>`;
+    g+=`<text x="${pl+bw+8}" y="${yc+5}" class="gval">${o.q}</text>`;});
+  g+=`</svg>`;document.getElementById("chartPerfil").innerHTML=g;
+}
+function renderSemana(){
+  const d=filtered(),ps=perfisList(),sems=[...new Set(d.map(r=>r.Semana))].sort((a,b)=>a-b);
+  const W=700,H=250,pl=38,pr=14,pt=16,pb=48,iw=W-pl-pr,ih=H-pt-pb;
+  const tot=sems.map(s=>sum(d.filter(r=>r.Semana===s).map(r=>r.Quant)));
+  const max=Math.max(...tot,1),gap=sems.length?iw/sems.length:0,bw=sems.length?Math.min(90,gap*0.55):0;
+  let g=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
+  for(let i=0;i<=4;i++){const gv=Math.round(max*i/4),gy=pt+ih-(gv/max)*ih;
+    g+=`<line x1="${pl}" y1="${gy}" x2="${W-pr}" y2="${gy}" stroke="var(--line)"/><text x="${pl-6}" y="${gy+3}" text-anchor="end" class="glabel">${gv}</text>`;}
+  sems.forEach((s,i)=>{const cx=pl+gap*i+gap/2;let acc=0;
+    ps.forEach(p=>{const q=sum(d.filter(r=>r.Semana===s&&r.Perfil===p).map(r=>r.Quant));if(!q)return;
+      const h=(q/max)*ih,yy=pt+ih-(acc/max)*ih-h,op=(state.highlight&&state.highlight!==p)?0.3:1;
+      g+=`<rect x="${cx-bw/2}" y="${yy}" width="${bw}" height="${h}" fill="${PC[p]}" opacity="${op}"/>`;
+      if(h>15)g+=`<text x="${cx}" y="${yy+h/2+4}" text-anchor="middle" style="fill:#0f151c;font-size:10px;font-weight:700">${q}</text>`;acc+=q;});
+    g+=`<text x="${cx}" y="${pt+ih+18}" text-anchor="middle" class="glabel">Sem ${s}</text>`;
+    g+=`<text x="${cx}" y="${pt+ih-(acc/max)*ih-7}" text-anchor="middle" class="gval">${tot[i]}</text>`;});
+  ps.forEach((p,i)=>{const lx=pl+i*60;g+=`<rect x="${lx}" y="${H-14}" width="11" height="11" rx="2" fill="${PC[p]}"/><text x="${lx+15}" y="${H-5}" class="glabel">${p}</text>`;});
+  g+=`</svg>`;document.getElementById("chartSemana").innerHTML=sems.length?g:`<div class="empty">Sem dados.</div>`;
+}
+function renderPerfis(){
+  const d=filtered(),ps=perfisList();
+  document.getElementById("perfis").innerHTML=ps.map(p=>{
+    const rows=d.filter(r=>r.Perfil===p),tot=sum(rows.map(r=>r.Quant));
+    const part=sum(rows.filter(r=>r.SubTipo==="Partidos").map(r=>r.Quant));
+    const int=sum(rows.filter(r=>r.SubTipo==="Inteiros").map(r=>r.Quant));
+    const col=sum(rows.filter(r=>r.Tipo==="Colocação").map(r=>r.Quant));
+    const body=rows.length?rows.slice().sort((a,b)=>a.Data<b.Data?1:-1).map(r=>
+      `<tr><td class="l">${fmtD(r.Data)}</td><td>${r.SubTipo==="-"?"Coloc.":r.SubTipo}</td><td>${r.Quant}</td></tr>`).join("")
+      :`<tr><td colspan="3" class="empty" style="padding:14px">Sem registos</td></tr>`;
+    const dim=(state.highlight&&state.highlight!==p)?"dim":"";
+    return `<div class="pcard ${dim}" onclick="toggleHL('${p}')">
+      <div class="phead" style="background:${PC[p]}1a"><span class="ptag" style="color:${PC[p]}">${p}</span><span class="ptot">${tot}</span></div>
+      <div class="pmeta"><span>Inteiros <b>${int}</b></span><span>Partidos <b>${part}</b></span><span>Coloc. <b>${col}</b></span></div>
+      <table><thead><tr><th>Data</th><th>Sub Tipo</th><th>Qt</th></tr></thead><tbody>${body}</tbody></table></div>`;
+  }).join("");
+}
+function toggleHL(p){state.highlight=state.highlight===p?null:p;render();}
 
-async function loadDB(){
-  sbStatus('bz');
-  try{
-    const rows=await SB.list();
-    sbStatus('ok');
-    return rows.map(r=>({
-      id:r.id,
-      meta:{obra:r.obra,data:r.data,autor:r.autor,ptipo:r.ptipo,pini:r.pini,pfim:r.pfim},
-      prazo:{feel:r.feel},
-      updatedAt:r.updated_at,
-      _payload:r.payload
-    }));
-  }catch(e){ console.error('Supabase load:',e); sbStatus('err'); toast('⚠ '+e.message); return []; }
+function render(){
+  buildPC();buildFilters();renderKPIs();renderRecTable();renderPerfis();renderTime();renderPerfil();renderSemana();
+  document.getElementById("fnote").textContent=
+    `Total geral: ${sum(records.map(r=>r.Quant))} un. (Remoção ${sum(records.filter(r=>r.Tipo==="Remoção").map(r=>r.Quant))} / Colocação ${sum(records.filter(r=>r.Tipo==="Colocação").map(r=>r.Quant))})`;
 }
 
-/* ============================ state ============================ */
-var state = blank();
-let DB = [];
-let editingId = null;
+function init(){
+  loadRecords();applyTheme(themePref);
+  document.querySelectorAll(".theme button").forEach(b=>b.onclick=()=>{themePref=b.dataset.th;applyTheme(themePref);});
+  document.getElementById("fSemana").onchange=e=>{state.semana=e.target.value;render();};
+  document.getElementById("fTipo").onchange=e=>{state.tipo=e.target.value;render();};
+  document.getElementById("fSub").onchange=e=>{state.sub=e.target.value;render();};
+  document.getElementById("fDia").onchange=e=>{state.dia=e.target.value;render();};
+  document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{state.timeMode=b.dataset.mode;document.querySelectorAll("[data-mode]").forEach(x=>x.classList.toggle("active",x===b));renderTime();});
+  document.querySelectorAll("#recTable th[data-k]").forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(state.sortK===k)state.sortDir*=-1;else{state.sortK=k;state.sortDir=1;}renderRecTable();});
+  document.getElementById("reset").onclick=()=>{state=Object.assign({},state,{semana:"Todas",dia:"",tipo:"Todos",sub:"Todos",highlight:null,sortK:null,editId:null});render();};
+  document.getElementById("csv").onclick=()=>{
+    const d=filtered(),head="Semana,Data,Tipo,Sub Tipo,Perfil,Quant";
+    const body=d.map(r=>`${r.Semana},${r.Data},${r.Tipo},${r.SubTipo},${r.Perfil},${r.Quant}`).join("\n");
+    const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([head+"\n"+body],{type:"text/csv;charset=utf-8"}));a.download="tetrapodes_listagem.csv";a.click();};
 
-function blank(){
-  return {
-    id:null, createdAt:null, updatedAt:null,
-    meta:{data:'',obra:'',autor:'',ptipo:'semanal',pini:'',pfim:''},
-    tn:{total:'',trabAnt:'',admDir:'',novoContr:'',exec:'',cron:'',nota:''},
-    tcAprov:'', tcPend:'',
-    tcp:[],
-    fin:{pagos:'',divida:'',nota:''},
-    prazo:{concl:'',baliz:'',fisc:'',feel:'',nota:''},
-    wk:[], tm:[], pe:[], pa:[],
-    obs:''
+  const rTipo=document.getElementById("rTipo"),rSub=document.getElementById("rSub"),rDia=document.getElementById("rDia"),rSem=document.getElementById("rSemana");
+  rDia.onchange=()=>{if(rDia.value)rSem.value=isoWeek(rDia.value);};
+  rTipo.onchange=()=>{const col=rTipo.value==="Colocação";rSub.disabled=col;rSub.style.opacity=col?.4:1;};
+  document.getElementById("rAdd").onclick=()=>{
+    const dia=rDia.value,q=parseInt(document.getElementById("rQuant").value,10);
+    if(!dia){alert("Indique o dia.");return;}
+    if(!q||q<1){alert("Quantidade inválida.");return;}
+    const tipo=rTipo.value;
+    records.push({id:newId(),Semana:parseInt(rSem.value,10)||isoWeek(dia),Data:dia,Tipo:tipo,
+      SubTipo:tipo==="Colocação"?"-":rSub.value,Quant:q,Perfil:document.getElementById("rPerfil").value});
+    saveRecords();document.getElementById("secRec").open=true;render();
   };
-}
-function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
-// State always stores PT-formatted strings (canonical). num() parses them explicitly in PT,
-// not via toFloat() — toFloat depends on current LANG and would mangle PT strings in EN mode.
-const num = v => { const n=toFloatLang(v,'pt'); return isNaN(n)?0:n; };
-
-/* ============================ formatting ============================ */
-// Numbers ALWAYS formatted in pt-PT regardless of LANG. This is a PT report with EUR values;
-// the numeric convention is canonical and does not translate. Only labels and text content translate.
-// Column headers already display "(€)"; individual values never carry the € symbol.
-function fmtMoney(v){
-  return new Intl.NumberFormat('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:'always'}).format(v||0);
-}
-function fmtMoneyShort(v){
-  const a=Math.abs(v);
-  if(a>=1e6) return (v/1e6).toFixed(2).replace('.',',')+'M';
-  if(a>=1e3) return (v/1e3).toFixed(0)+'k';
-  return Math.round(v).toString();
-}
-function fmtPct(v){ if(!isFinite(v)) return '—'; return new Intl.NumberFormat('pt-PT',{maximumFractionDigits:1,useGrouping:'always'}).format(v)+'%'; }
-
-/* ============================ form <-> state ============================ */
-function readForm(){
-  // In EN mode the report is read-only: the DOM holds reformatted numbers and translated text
-  // that do NOT represent the canonical state. Reading would corrupt it.
-  if(LANG==='en') return;
-  state.meta={data:val('m-data'),obra:val('m-obra'),autor:val('m-autor'),ptipo:val('m-ptipo'),pini:val('m-pini'),pfim:val('m-pfim')};
-  state.tn={total:val('tn-total'),trabAnt:val('tn-trab-ant'),admDir:val('tn-adm-dir'),novoContr:val('tn-novo-contr'),exec:val('tn-exec'),cron:val('tn-cron'),nota:val('tn-nota')};
-  state.tcAprov=val('tc-aprov-val');
-  state.tcPend =val('tc-pend-val');
-  state.fin={pagos:val('fin-pagos'),divida:val('fin-divida'),nota:val('fin-nota')};
-  const f=document.querySelector('input[name=feel]:checked');
-  state.prazo={concl:val('pz-concl'),baliz:val('pz-baliz'),fisc:val('pz-fisc'),feel:f?f.value:'',nota:val('pz-nota')};
-  state.obs=val('obs-gerais');
-  /* dynamic lists are kept in state live via their oninput handlers */
-}
-function writeForm(){
-  // Legacy migration: old tc array → new tcAprov sum + tcp pending list
-  if(Array.isArray(state.tc) && state.tc.length){
-    const old=state.tc, pv=v=>parseFloat(String(v||'').replace(/\s/g,'').replace(',','.'))||0;
-    const sumAp=old.filter(x=>x.estado==='aprov').reduce((s,x)=>s+pv(x.valor),0);
-    const pendList=old.filter(x=>x.estado!=='aprov').map((x,i)=>({
-      id:`TCP-${String(i+1).padStart(2,'0')}`, data:x.data||'', valor:String(x.valor||''), desc:x.desc||''
-    }));
-    if(!state.tcAprov && sumAp) state.tcAprov=String(sumAp);
-    if((!Array.isArray(state.tcp)||!state.tcp.length) && pendList.length) state.tcp=pendList;
-  }
-  delete state.tc;
-  // Normalize against blank() so missing keys never crash
-  const def=blank();
-  state={...def,...state,
-    meta: {...def.meta, ...(state.meta||{})},
-    tn:   {...def.tn,   ...(state.tn||{})},
-    fin:  {...def.fin,  ...(state.fin||{})},
-    prazo:{...def.prazo,...(state.prazo||{})}};
-  ['tcp','wk','tm','pe','pa'].forEach(k=>{ if(!Array.isArray(state[k])) state[k]=[]; });
-  // Legacy migration: wk items with old `estado` → new {prev,curso} flags
-  state.wk = state.wk.map(r=>{
-    if(r && typeof r==='object' && 'estado' in r && !('prev' in r) && !('curso' in r)){
-      const e=r.estado;
-      const prev = e==='prev'||e==='curso'||e==='concl';   // any old value implies it was on the radar
-      const curso= e==='curso';                            // only "curso" maps to ongoing
-      return {desc:r.desc||'', prev, curso};
-    }
-    return {desc:r?.desc||'', prev:!!r?.prev, curso:!!r?.curso};
-  });
-  set('m-data',state.meta.data); set('m-obra',state.meta.obra); set('m-autor',state.meta.autor);
-  set('m-ptipo',state.meta.ptipo||'semanal'); set('m-pini',state.meta.pini); set('m-pfim',state.meta.pfim);
-  // Migrate legacy v26.07.06.1428: totalNew (manual "Total Contratado (novo)") → total
-  if(state.tn && state.tn.totalNew && !state.tn.total){ state.tn.total = state.tn.totalNew; }
-  if(state.tn) delete state.tn.totalNew;
-  set('tn-total',state.tn.total); set('tn-trab-ant',state.tn.trabAnt); set('tn-adm-dir',state.tn.admDir); set('tn-novo-contr',state.tn.novoContr);
-  set('tn-exec',state.tn.exec); set('tn-cron',state.tn.cron); set('tn-nota',state.tn.nota);
-  set('tc-aprov-val',state.tcAprov); set('tc-pend-val',state.tcPend);
-  set('fin-pagos',state.fin.pagos); set('fin-divida',state.fin.divida); set('fin-nota',state.fin.nota);
-  set('pz-concl',state.prazo.concl); set('pz-baliz',state.prazo.baliz); set('pz-fisc',state.prazo.fisc); set('pz-nota',state.prazo.nota);
-  document.querySelectorAll('input[name=feel]').forEach(r=>r.checked=(r.value===state.prazo.feel));
-  set('obs-gerais',state.obs);
-  renderTCP(); renderWK(); renderTM(); renderPE(); renderPA();
-}
-const val = id => (document.getElementById(id)?.value ?? '');
-const set = (id,v)=>{ const e=document.getElementById(id); if(e) e.value=(v??''); };
-
-/* ============================ dynamic lists ============================ */
-function addTcp(){ state.tcp.push({id:nextId('tcp'),data:'',valor:'',desc:''}); renderTCP(); recalc(); }
-function addWK(){ state.wk.push({desc:'',prev:true,curso:false}); renderWK(); }
-function addTM(){ state.tm.push({data:'',desc:'',ver:'',resp:'',ajudaDo:false,done:false}); renderTM(); }
-function addPE(){ state.pe.push({id:nextId('pe'),data:'',desc:'',motivo:''}); renderPE(); }
-function addPA(){ state.pa.push({id:nextId('pa'),data:'',desc:'',motivo:''}); renderPA(); }
-function nextId(kind){ const pref={pe:'PE',pa:'PA',tcp:'TCP'}[kind]||kind.toUpperCase(); const arr=state[kind]||[]; return pref+'-'+String(arr.length+1).padStart(2,'0'); }
-function del(kind,i){ state[kind].splice(i,1); ({tcp:renderTCP,wk:renderWK,tm:renderTM,pe:renderPE,pa:renderPA})[kind](); recalc(); }
-const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-
-function renderTCP(){
-  const c=document.getElementById('tcp-rows'); if(!c) return;
-  if(!state.tcp.length){ c.innerHTML=`<div class="empty">${t('s2.empty')}</div>`; return; }
-  c.innerHTML=state.tcp.map((r,i)=>`
-   <div class="row-item row-tcp">
-     <div><span class="micro">${t('tcp.id')}</span><input class="inp" value="${esc(r.id)}" oninput="state.tcp[${i}].id=this.value"></div>
-     <div><span class="micro">${t('tcp.data')}</span><input class="inp" type="date" value="${esc(r.data)}" oninput="state.tcp[${i}].data=this.value"></div>
-     <div><span class="micro">${t('tcp.valor')}</span><input class="inp money" type="text" inputmode="decimal" value="${esc(r.valor)}" oninput="state.tcp[${i}].valor=this.value;recalc()"></div>
-     <div><span class="micro">${t('tcp.desc')}</span><input class="inp" placeholder="${t('tcp.desc.ph')}" value="${esc(r.desc)}" oninput="state.tcp[${i}].desc=this.value"></div>
-     <button class="iconbtn rm" title="${t('hist.del')}" onclick="del('tcp',${i})">✕</button>
-   </div>`).join('');
-}
-function wkStat(r){ return r.prev&&r.curso?'ok':r.prev?'warn':r.curso?'risk':'muted'; }
-function refreshWkUi(){
-  const items=state.wk||[];
-  const tipMap={ok:t('wk.stat.ok'),warn:t('wk.stat.warn'),risk:t('wk.stat.risk'),muted:t('wk.stat.none')};
-  document.querySelectorAll('#wk-rows .wk-stat').forEach((dot,i)=>{
-    const s=wkStat(items[i]||{}); dot.dataset.stat=s; dot.title=tipMap[s];
-  });
-  const ok=items.filter(r=>r.prev&&r.curso).length;
-  const warn=items.filter(r=>r.prev&&!r.curso).length;
-  const risk=items.filter(r=>!r.prev&&r.curso).length;
-  const sum=document.getElementById('wk-summary'); if(!sum) return;
-  sum.innerHTML = items.length ? [
-    `<span class="chip ok"><span class="dot"></span>${ok} · ${t('wk.stat.ok')}</span>`,
-    `<span class="chip warn"><span class="dot"></span>${warn} · ${t('wk.stat.warn')}</span>`,
-    (risk?`<span class="chip risk"><span class="dot"></span>${risk} · ${t('wk.stat.risk')}</span>`:'')
-  ].join('') : '';
-}
-function renderWK(){
-  const c=document.getElementById('wk-rows'); if(!c) return;
-  if(!state.wk.length){ c.innerHTML=`<div class="empty">${t('s5.empty')}</div>`; refreshWkUi(); return; }
-  c.innerHTML=state.wk.map((r,i)=>`
-   <div class="row-item row-wk">
-     <span class="wk-stat" data-stat="${wkStat(r)}"></span>
-     <input class="inp wk-desc-input" placeholder="${t('wk.desc.ph')}" value="${esc(r.desc)}" oninput="state.wk[${i}].desc=this.value">
-     <div class="wk-toggles">
-       <label class="wk-check"><input type="checkbox" ${r.prev?'checked':''} onchange="state.wk[${i}].prev=this.checked;refreshWkUi()"><span>${t('wk.prev')}</span></label>
-       <label class="wk-check"><input type="checkbox" ${r.curso?'checked':''} onchange="state.wk[${i}].curso=this.checked;refreshWkUi()"><span>${t('wk.curso')}</span></label>
-     </div>
-     <button class="iconbtn rm" onclick="del('wk',${i})">✕</button>
-   </div>`).join('');
-  refreshWkUi();
-}
-function renderTM(){
-  const c=document.getElementById('tm-rows');
-  if(!state.tm.length){ c.innerHTML=`<div class="empty">—</div>`; return; }
-  const yes=t('yes'), no=t('no');
-  c.innerHTML=state.tm.map((r,i)=>`
-   <div class="row-item row-tm">
-     <div><span class="micro">${t('tm.data')}</span><input class="inp" type="date" value="${esc(r.data)}" oninput="state.tm[${i}].data=this.value"></div>
-     <div><span class="micro">${t('tm.desc')}</span><input class="inp" placeholder="${t('tm.desc.ph')}" value="${esc(r.desc)}" oninput="state.tm[${i}].desc=this.value"></div>
-     <div><span class="micro">${t('tm.ver')}</span><input class="inp" placeholder="${t('tm.ver.ph')}" value="${esc(r.ver||'')}" oninput="state.tm[${i}].ver=this.value"></div>
-     <div><span class="micro">${t('tm.resp')}</span><input class="inp" placeholder="${t('tm.resp.ph')}" value="${esc(r.resp||'')}" oninput="state.tm[${i}].resp=this.value"></div>
-     <div><span class="micro">${t('tm.ajuda')}</span><label class="chk-yn"><input type="checkbox" ${r.ajudaDo?'checked':''} onchange="state.tm[${i}].ajudaDo=this.checked;this.nextElementSibling.textContent=this.checked?'${yes}':'${no}'"><span class="chk-label">${r.ajudaDo?yes:no}</span></label></div>
-     <div><span class="micro">${t('tm.done')}</span><label class="chk-yn"><input type="checkbox" ${r.done?'checked':''} onchange="state.tm[${i}].done=this.checked;this.nextElementSibling.textContent=this.checked?'${yes}':'${no}'"><span class="chk-label">${r.done?yes:no}</span></label></div>
-     <button class="iconbtn rm" onclick="del('tm',${i})">✕</button>
-   </div>`).join('');
-}
-function renderPend(kind){
-  const c=document.getElementById(kind+'-rows');
-  if(!state[kind].length){ c.innerHTML=`<div class="empty">—</div>`; return; }
-  c.innerHTML=state[kind].map((r,i)=>`
-   <div class="row-item row-pe">
-     <div><span class="micro">${t('pe.id')}</span><input class="inp" value="${esc(r.id)}" oninput="state.${kind}[${i}].id=this.value"></div>
-     <div><span class="micro">${t('pe.data')}</span><input class="inp" type="date" value="${esc(r.data)}" oninput="state.${kind}[${i}].data=this.value"></div>
-     <div><span class="micro">${t('pe.desc')}</span><input class="inp" placeholder="${t('pe.desc.ph')}" value="${esc(r.desc)}" oninput="state.${kind}[${i}].desc=this.value"></div>
-     <div><span class="micro">${t('pe.motivo')}</span><input class="inp" placeholder="${t('pe.motivo.ph')}" value="${esc(r.motivo)}" oninput="state.${kind}[${i}].motivo=this.value"></div>
-     <button class="iconbtn rm" onclick="del('${kind}',${i})">✕</button>
-   </div>`).join('');
-}
-const renderPE=()=>renderPend('pe');
-const renderPA=()=>renderPend('pa');
-
-/* ============================ recalc / dashboard ============================ */
-function recalc(){
-  readForm();
-  const tot=num(state.tn.total), trabAnt=num(state.tn.trabAnt), admDir=num(state.tn.admDir);
-  const emAberto = tot - trabAnt - admDir;
-  const novoContr = num(state.tn.novoContr);
-  const custoExtra = novoContr - emAberto;
-  const exec=num(state.tn.exec), cron=num(state.tn.cron);
-  const execRef = novoContr || emAberto;       // referência da execução: Novo Contrato se houver, senão Em Aberto
-  const falta = execRef - exec;
-  const desvio = exec - cron;
-  // % over Total Contratado (gross) for the breakdown rows
-  const setPct=(id,pct)=>{ const e=document.getElementById(id); if(e) e.textContent=isFinite(pct)?fmtPct(pct):'—'; };
-  setPct('tn-trab-ant-pct', tot? trabAnt/tot*100 : NaN);
-  setPct('tn-adm-dir-pct',  tot? admDir/tot*100  : NaN);
-  // Total Em Aberto (computed) and its weight in Total Contratado
-  const rEl=document.getElementById('tn-em-aberto'); if(rEl) rEl.textContent=(tot||trabAnt||admDir)?fmtMoney(emAberto):'—';
-  setPct('tn-em-aberto-pct', tot? emAberto/tot*100 : NaN);
-  // Custo Extra (= Novo Contrato − Em Aberto): only when Novo Contrato is set; % over Em Aberto
-  const ceEl=document.getElementById('tn-custo-extra');
-  if(ceEl){
-    ceEl.textContent = novoContr ? fmtMoney(custoExtra) : '—';
-    ceEl.style.color = !novoContr ? '' : custoExtra>0 ? 'var(--risk)' : custoExtra<0 ? 'var(--ok)' : 'var(--navy)';
-  }
-  setPct('tn-custo-extra-pct', (novoContr && emAberto) ? custoExtra/emAberto*100 : NaN);
-  // Novo Contrato weight over Em Aberto
-  setPct('tn-novo-contr-pct', (novoContr && emAberto) ? novoContr/emAberto*100 : NaN);
-  // % over execRef for execution rows
-  const execPct = execRef? exec/execRef*100   : NaN;
-  const cronPct = execRef? cron/execRef*100   : NaN;
-  const faltaPct= execRef? falta/execRef*100  : NaN;
-  const desvioPct=execRef? desvio/execRef*100 : NaN;
-  setPct('tn-exec-pct',  execPct);
-  setPct('tn-cron-pct',  cronPct);
-  setPct('tn-falta-pct', faltaPct);
-  const fEl=document.getElementById('tn-falta'); if(fEl){ fEl.textContent=(execRef||exec)?fmtMoney(falta):'—'; fEl.style.color=falta<0?'var(--risk)':''; }
-  const dEl=document.getElementById('tn-desvio'); dEl.textContent=(exec||cron)?fmtMoney(desvio):'—';
-  dEl.style.color = desvio<0?'var(--risk)':desvio>0?'var(--ok)':'var(--navy)';
-  const dpEl=document.getElementById('tn-desvio-pct'); dpEl.textContent=isFinite(desvioPct)?(desvio>0?'+':'')+fmtPct(desvioPct):'—';
-  dpEl.style.color=dEl.style.color;
-
-  // TC — manual totals + two weights (over TN contracted and over TN executed)
-  const aprov = num(state.tcAprov);
-  const por   = num(state.tcPend);
-  const tcTot = aprov+por;
-  const tcSet = (id,pct)=>{ const e=document.getElementById(id); if(e) e.textContent=isFinite(pct)?fmtPct(pct):'—'; };
-  tcSet('tc-aprov-pct-tot',  tot ? aprov/tot*100  : NaN);
-  tcSet('tc-aprov-pct-exec', exec? aprov/exec*100 : NaN);
-  tcSet('tc-pend-pct-tot',   tot ? por/tot*100    : NaN);
-  const tvEl=document.getElementById('tc-total-val'); if(tvEl) tvEl.textContent=(aprov||por)?fmtMoney(tcTot):'—';
-  tcSet('tc-total-pct-tot',  tot ? tcTot/tot*100  : NaN);
-  tcSet('tc-total-pct-exec', exec? tcTot/exec*100 : NaN);
-
-  const divida=num(state.fin.divida);
-  const feel=state.prazo.feel;
-  const dias = state.prazo.concl ? Math.round((new Date(state.prazo.concl)-new Date())/86400000) : null;
-
-  renderKPIs({execPct,cronPct,desvio,desvioPct,aprov,por,tot,divida,feel,dias});
-  updateMetaSub();
+  render();
 }
 
-function renderKPIs(d){
-  const feelClass={ok:'k-ok',warn:'k-warn',risk:'k-risk'}[d.feel]||'k-info';
-  const feelLbl={ok:t('kf.ok'),warn:t('kf.warn'),risk:t('kf.risk')}[d.feel]||t('kf.na');
-  const execW=isFinite(d.execPct)?Math.min(100,Math.max(0,d.execPct)):0;
-  const cronW=isFinite(d.cronPct)?Math.min(100,Math.max(0,d.cronPct)):0;
-  const desKind = d.desvio<0?'k-risk':d.desvio>0?'k-ok':'k-info';
-  const desCls = d.desvio<0?'neg':d.desvio>0?'pos':'';
-  const diasTxt = d.dias===null?'—':(d.dias+' '+t('k.prazo'));
-  const diasKind = d.dias===null?'k-info':(d.dias<0?'k-risk':d.dias<15?'k-warn':'k-ok');
-  document.getElementById('kpis').innerHTML=`
-    <div class="kpi k-info"><div class="kl">${t('k.exec')}</div><div class="kv">${isFinite(d.execPct)?fmtPct(d.execPct):'—'}</div>
-      <div class="bar"><i style="width:${execW}%"></i><span class="mark" style="left:${cronW}%"></span></div>
-      <div class="ks">${t('prev')} ${isFinite(d.cronPct)?fmtPct(d.cronPct):'—'}</div></div>
-    <div class="kpi ${desKind}"><div class="kl">${t('k.desvio')}</div><div class="kv ${desCls}">${(d.tot||d.desvio)?fmtMoneyShort(d.desvio):'—'}</div><div class="ks">${isFinite(d.desvioPct)?((d.desvio>0?'+':'')+fmtPct(d.desvioPct)):'—'}</div></div>
-    <div class="kpi k-ok"><div class="kl">${t('k.tcap')}</div><div class="kv">${d.aprov?fmtMoneyShort(d.aprov):'—'}</div><div class="ks">${d.tot?fmtPct(d.aprov/d.tot*100):'—'} ${t('of')} TN</div></div>
-    <div class="kpi k-warn"><div class="kl">${t('k.tcpor')}</div><div class="kv">${d.por?fmtMoneyShort(d.por):'—'}</div><div class="ks">${d.tot?fmtPct(d.por/d.tot*100):'—'} ${t('of')} TN</div></div>
-    <div class="kpi k-gold"><div class="kl">${t('k.divida')}</div><div class="kv">${d.divida?fmtMoneyShort(d.divida):'—'}</div><div class="ks">${diasTxt}</div></div>
-    <div class="kpi ${feelClass}"><div class="kl">${t('k.feel')}</div><div class="kv" style="font-size:15px;padding-top:4px"><span class="chip ${ {ok:'ok',warn:'warn',risk:'risk'}[d.feel]||'muted' }"><span class="dot"></span>${feelLbl}</span></div><div class="ks">${diasKind==='k-risk'&&d.dias!==null?'⚠':''}</div></div>`;
-}
-
-function updateMetaSub(){
-  const m=state.meta;
-  const parts=[];
-  if(m.obra) parts.push(m.obra);
-  if(m.pini||m.pfim) parts.push((m.pini||'…')+' → '+(m.pfim||'…'));
-  else if(m.data) parts.push(m.data);
-  document.getElementById('meta-sub').textContent=parts.join('  ·  ');
-}
-
-/* ============================ CRUD ============================ */
-async function saveReport(){
-  readForm();
-  if(!state.meta.data || !state.meta.obra){ toast(t('msg.need')); openSec('sec-meta'); return; }
-  const now=new Date().toISOString();
-  if(!state.id){ state.id=uid(); state.createdAt=now; }
-  state.updatedAt=now;
-  editingId=state.id;
-  const z=v=>(v===''||v==null)?null:v;
-  const row={
-    id:state.id,
-    obra:state.meta.obra,
-    data:z(state.meta.data),
-    autor:z(state.meta.autor),
-    ptipo:z(state.meta.ptipo),
-    pini:z(state.meta.pini),
-    pfim:z(state.meta.pfim),
-    feel:z(state.prazo.feel),
-    payload:state
-  };
-  sbStatus('bz');
-  try{
-    await SB.upsert(row);
-    DB=await loadDB();
-    renderHist(); renderObraView();
-    hideEditor(); window.scrollTo({top:0,behavior:'smooth'});
-    toast(t('msg.saved'));
-  }catch(e){ sbStatus('err'); toast('⚠ '+e.message); }
-}
-function newReport(){
-  readForm();
-  if(dirty() && !confirm(t('confirm.new'))) return;
-  state=blank(); editingId=null; set('m-data',new Date().toISOString().slice(0,10)); state.meta.data=val('m-data');
-  writeForm(); applyMoneyFormat(); recalc(); showEditor(); window.scrollTo({top:0,behavior:'smooth'}); renderHist();
-  try{ history.replaceState({}, '', location.pathname); }catch(e){}
-  toast(t('msg.new'));
-}
-function cloneLast(){
-  readForm();
-  const obra=state.meta.obra;
-  let pool=DB;
-  if(obra) { const f=DB.filter(r=>r.meta.obra===obra); if(f.length) pool=f; }
-  if(!pool.length){ toast(t('msg.nolast')); return; }
-  const last=pool.slice().sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''))[0];
-  state=structuredClone(last._payload||blank());
-  state.id=null; state.createdAt=null; state.updatedAt=null; editingId=null;
-  // clear what changes each period
-  state.meta.data=''; state.meta.pini=''; state.meta.pfim=''; state.obs='';
-  writeForm(); applyMoneyFormat(); recalc(); showEditor(); window.scrollTo({top:0,behavior:'smooth'}); openSec('sec-meta'); renderHist(); toast(t('msg.cloned'));
-}
-function loadRecord(id){
-  const r=DB.find(x=>x.id===id); if(!r) return;
-  state=structuredClone(r._payload||blank()); editingId=id; writeForm(); applyMoneyFormat(); recalc(); renderHist(); renderObraView(); closeHist(); showEditor(); applyEditableState(LANG==='en'); if(LANG==='en') translateVisibleContent(); window.scrollTo({top:0,behavior:'smooth'}); toast(t('msg.loaded'));
-}
-async function deleteRecord(id,ev){
-  ev?.stopPropagation();
-  if(!confirm(t('confirm.del'))) return;
-  sbStatus('bz');
-  try{
-    await SB.del(id);
-    if(editingId===id){ editingId=null; }
-    DB=await loadDB();
-    renderHist(); renderObraView(); toast(t('msg.del'));
-  }catch(e){ sbStatus('err'); toast('⚠ '+e.message); }
-}
-function dirty(){ return JSON.stringify(state)!==JSON.stringify(blank()) && !!(state.meta?.obra||state.tn?.total||state.tcp?.length||state.pe?.length); }
-
-function exportJSON(){
-  readForm();
-  const payload = editingId ? (DB.find(r=>r.id===editingId)||state) : state;
-  const obra=(state.meta.obra||'obra').replace(/[^\w]+/g,'_').toLowerCase();
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download=`fisc_${obra}_${state.meta.data||'periodo'}.json`; a.click();
-  toast(t('msg.exp'));
-}
-
-/* ============================ deploy → GitHub/Vercel ============================ */
-const GITHUB_REPO='CarSanFer/velocity-aceitar';
-function pathForFile(name){
-  let clean=name.replace(/\s*\(\d+\)(?=\.[^.]+$)/,'');
-  if(clean.toLowerCase().endsWith('.html')) return 'index.html';
-  if(clean.toLowerCase().endsWith('.sql'))  return 'db/'+clean;
-  return clean;
-}
-async function deployToGitHub(input){
-  const file=input.files[0]; if(!file) return;
-  const targetPath=pathForFile(file.name);
-  const text=await file.text();
-  if(targetPath==='index.html' && !text.trim().toLowerCase().startsWith('<!doctype html')){
-    if(!confirm('⚠️ Este ficheiro não parece ser HTML mas vai para index.html.\n\nIsto pode partir o site. Continuar?')){ input.value=''; return; }
-  }
-  const btn=document.getElementById('btn-deploy');
-  const origText=btn.innerHTML;
-  btn.innerHTML='⏳ '+targetPath+'…'; btn.style.pointerEvents='none';
-  let token=localStorage.getItem('gh_token');
-  if(!token){
-    token=prompt('GitHub Personal Access Token (scope: repo):');
-    if(!token){ btn.innerHTML=origText; btn.style.pointerEvents=''; return; }
-    localStorage.setItem('gh_token',token.trim());
-  }
-  try{
-    const bytes=new TextEncoder().encode(text);
-    let binary=''; const chunk=8192;
-    for(let i=0;i<bytes.length;i+=chunk){ binary+=String.fromCharCode(...bytes.subarray(i,i+chunk)); }
-    const encoded=btoa(binary);
-    const getResp=await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${targetPath}`,{
-      headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json'}
-    });
-    const existing=getResp.ok?await getResp.json():null;
-    const sha=existing?.sha;
-    const putResp=await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${targetPath}`,{
-      method:'PUT',
-      headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:`Deploy ${targetPath} — ${new Date().toLocaleString('pt-PT')}`,content:encoded,...(sha?{sha}:{})})
-    });
-    if(!putResp.ok){ const err=await putResp.json(); throw new Error(err.message||'Erro no deploy'); }
-    btn.innerHTML='✅ '+targetPath;
-    setTimeout(()=>{ btn.innerHTML=origText; btn.style.pointerEvents=''; },3000);
-  }catch(e){
-    alert('Erro no deploy: '+e.message);
-    localStorage.removeItem('gh_token');
-    btn.innerHTML=origText; btn.style.pointerEvents='';
-  }
-}
-
-/* ============================ history ============================ */
-function renderHist(){
-  document.getElementById('hist-count').textContent=DB.length;
-  const c=document.getElementById('hist-list');
-  if(!DB.length){ c.innerHTML=`<div class="empty">${t('hist.empty')}</div>`; return; }
-  const sorted=DB.slice().sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
-  c.innerHTML=sorted.map(r=>{
-    const per = (r.meta.pini||r.meta.pfim) ? `${r.meta.pini||'…'} → ${r.meta.pfim||'…'}` : (r.meta.data||'—');
-    const tipo = t('s0.ptipo.'+({semanal:'w',quinzenal:'b',mensal:'m',outro:'o'}[r.meta.ptipo]||'o'));
-    const feel = r.prazo.feel?`<span class="chip ${ {ok:'ok',warn:'warn',risk:'risk'}[r.prazo.feel] }" style="font-size:9px"><span class="dot"></span></span>`:'';
-    return `<div class="hrec ${r.id===editingId?'active':''}" onclick="loadRecord('${r.id}')">
-      <div class="ht"><span>${esc(r.meta.obra||'—')}</span>${feel}</div>
-      <div class="hsub">${esc(per)} · ${tipo}${r.meta.autor?' · '+esc(r.meta.autor):''}</div>
-      <div class="hact">
-        <button class="btn btn-out btn-sm" onclick="event.stopPropagation();loadRecord('${r.id}')">${t('hist.load')}</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteRecord('${r.id}',event)">${t('hist.del')}</button>
-      </div></div>`;
-  }).join('');
-}
-function openHist(){ renderHist(); document.getElementById('hist').classList.add('open'); document.getElementById('scrim').classList.add('on'); }
-function closeHist(){ document.getElementById('hist').classList.remove('open'); document.getElementById('scrim').classList.remove('on'); }
-
-/* ============================ vistas por obra ============================ */
-var ovFilter='';
-async function refreshDB(){ DB=await loadDB(); renderObraView(); renderHist(); toast(t('ov.refreshed')); }
-function renderObraView(){
-  const obras=[...new Set(DB.map(r=>r.meta.obra).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  const sel=document.getElementById('ov-obra');
-  if(sel){
-    if(ovFilter && !obras.includes(ovFilter)) ovFilter='';
-    sel.innerHTML=`<option value="">${t('ov.placeholder')}</option>`+
-      obras.map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('');
-    sel.value=ovFilter;
-  }
-  const cont=document.getElementById('ov-table'); if(!cont) return;
-  if(!DB.length){ cont.innerHTML=`<div class="empty">${t('ov.empty')}</div>`; return; }
-  if(!ovFilter){  cont.innerHTML=`<div class="empty">${t('ov.pick')}</div>`;  return; }
-  const rows=DB.filter(r=>r.meta.obra===ovFilter)
-    .slice().sort((a,b)=> ((b.meta.pfim||b.meta.data||'')+'').localeCompare((a.meta.pfim||a.meta.data||'')+''));
-  if(!rows.length){ cont.innerHTML=`<div class="empty">${t('ov.emptyObra')}</div>`; return; }
-  cont.innerHTML=`<table class="tbl ovt"><thead><tr>
-     <th>${t('ov.col.obra')}</th><th style="text-align:left">${t('ov.col.per')}</th><th style="text-align:left">${t('ov.col.autor')}</th>
-     <th>${t('ov.col.exec')}</th><th>${t('ov.col.desv')}</th><th style="text-align:center">${t('ov.col.feel')}</th>
-   </tr></thead><tbody>${rows.map(ovRow).join('')}</tbody></table>`;
-}
-function ovRow(r){
-  const p=r._payload||{}; const tn=p.tn||{};
-  const tot=num(tn.total),exec=num(tn.exec),cron=num(tn.cron);
-  const execPct=tot?exec/tot*100:NaN, desvio=exec-cron;
-  const feel=r.prazo?.feel||'';
-  const per=(r.meta.pini||r.meta.pfim)?`${r.meta.pini||'…'} → ${r.meta.pfim||'…'}`:(r.meta.data||'—');
-  const fLbl={ok:t('kf.ok'),warn:t('kf.warn'),risk:t('kf.risk')}[feel];
-  const chip=feel?`<span class="chip ${ {ok:'ok',warn:'warn',risk:'risk'}[feel] }" style="font-size:9px"><span class="dot"></span>${fLbl}</span>`:'—';
-  const dColor=desvio<0?'var(--risk)':desvio>0?'var(--ok)':'var(--muted)';
-  return `<tr class="ovrow ${r.id===editingId?'active':''}" onclick="openRecordInNewWindow('${r.id}')" title="${t('ov.open')}">
-    <td style="text-align:left;font-family:var(--sans);color:var(--navy);font-weight:600">${esc(r.meta.obra||'—')}</td>
-    <td style="text-align:left;font-family:var(--mono);font-size:12px">${esc(per)}</td>
-    <td style="text-align:left;font-family:var(--sans);color:var(--muted)">${esc(r.meta.autor||'—')}</td>
-    <td>${isFinite(execPct)?fmtPct(execPct):'—'}</td>
-    <td style="color:${dColor}">${(tot||exec||cron)?((desvio>0?'+':'')+fmtMoneyShort(desvio)):'—'}</td>
-    <td style="text-align:center">${chip}</td>
-  </tr>`;
-}
-function openRecordInNewWindow(id){
-  const base=location.href.split('?')[0].split('#')[0];
-  window.open(base+'?id='+encodeURIComponent(id),'_blank');
-}
-
-/* ============================ ui helpers ============================ */
-function toggleSec(h){ h.parentElement.classList.toggle('collapsed'); }
-function openSec(id){ document.getElementById(id)?.classList.remove('collapsed'); }
-let toastT;
-function toast(msg){ const e=document.getElementById('toast'); e.textContent=msg; e.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>e.classList.remove('show'),2200); }
-
-/* ============================ language ============================ */
-// LANG only affects: (1) UI labels via applyLang, (2) text content via translation, (3) read-only mode in EN.
-// It NEVER affects numeric formatting — money and percentages are always pt-PT.
-async function setLang(l){
-  const prevLang = LANG;
-  if(l===prevLang){
-    // Initial boot
-    document.documentElement.lang=l;
-    document.getElementById('lang-pt').classList.toggle('on',l==='pt');
-    document.getElementById('lang-en').classList.toggle('on',l==='en');
-    document.body.classList.toggle('lang-en', l==='en');
-    document.body.classList.toggle('lang-pt', l==='pt');
-    applyLang(); applyMoneyFormat();
-    applyEditableState(l==='en');
-    if(l==='en') translateVisibleContent();
-    return;
-  }
-  LANG=l; localStorage_safe('set','ace_fisc_lang',l);
-  document.documentElement.lang=l;
-  document.getElementById('lang-pt').classList.toggle('on',l==='pt');
-  document.getElementById('lang-en').classList.toggle('on',l==='en');
-  document.body.classList.toggle('lang-en', l==='en');
-  document.body.classList.toggle('lang-pt', l==='pt');
-  const wasEditing = document.body.classList.contains('editing');
-  if(l==='pt'){
-    // EN → PT: restore state (canonical PT) to DOM BEFORE applyLang to prevent readForm pollution
-    if(wasEditing) writeForm();
-    applyLang();          // re-renders dynamic items from state
-    applyMoneyFormat();   // formats money inputs in pt-PT (no-op if already correct)
-  } else {
-    // PT → EN: labels change, text content will be translated, read-only becomes active.
-    // Numbers stay exactly as they were in the DOM — no reformat.
-    applyLang();
-  }
-  applyEditableState(l==='en');
-  if(l==='en' && wasEditing) translateVisibleContent();   // fire-and-forget
-  recalc();
-}
-function applyEditableState(ro){
-  document.querySelectorAll('#editor input, #editor textarea').forEach(el=>{
-    if(el.type==='checkbox'||el.type==='radio'){ el.disabled = ro; return; }
-    if(ro) el.setAttribute('readonly','readonly');
-    else   el.removeAttribute('readonly');
-  });
-  document.querySelectorAll('#editor select').forEach(el=>{
-    if(ro) el.setAttribute('disabled','disabled');
-    else   el.removeAttribute('disabled');
-  });
-}
-async function translateText(text){
-  if(!text || !text.trim() || text.length<2) return text;
-  if(/^[\d\s.,€%+\-]+$/.test(text)) return text;        // skip pure numbers / dates
-  if(/^\d{4}-\d{2}-\d{2}/.test(text)) return text;       // skip ISO dates
-  if(/^v\d+(\.\d+)*$/i.test(text.trim())) return text;   // skip version tags (v1, v2, v1.0, v2.3.1)
-  const key='xlate:pt-en:'+text;
-  try{ const c=localStorage_safe('get',key); if(c) return c; }catch(e){}
-  try{
-    const url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=pt|en';
-    const resp=await fetch(url);
-    if(!resp.ok) throw new Error('HTTP '+resp.status);
-    const data=await resp.json();
-    const result=data?.responseData?.translatedText;
-    if(result && typeof result==='string' && result.toLowerCase()!=='no translation found'){
-      try{ localStorage_safe('set',key,result); }catch(e){}
-      return result;
-    }
-  }catch(e){ console.warn('translate fail:',e.message); }
-  return text;
-}
-async function translateVisibleContent(){
-  if(LANG!=='en') return;
-  sbStatus('bz');
-  const targets=[...document.querySelectorAll('#editor input.inp:not(.money), #editor textarea')]
-    .filter(el => el.type!=='date' && el.type!=='number' && el.value && el.value.trim());
-  const CHUNK=4;
-  for(let i=0;i<targets.length;i+=CHUNK){
-    const batch=targets.slice(i,i+CHUNK);
-    await Promise.all(batch.map(async el=>{
-      const original=el.value;
-      try{
-        const t=await translateText(original);
-        // Only apply if user hasn't switched back to PT during translation
-        if(LANG==='en' && t && t!==original) el.value=t;
-      }catch(e){}
-    }));
-  }
-  sbStatus('ok');
-}
-function applyLang(){
-  document.querySelectorAll('[data-i18n]').forEach(e=>{
-    const k=e.getAttribute('data-i18n'); if(I18N[LANG][k]===undefined) return;
-    let done=false;
-    for(const n of e.childNodes){
-      if(n.nodeType===3 && n.nodeValue.trim()){ n.nodeValue=I18N[LANG][k]; done=true; break; }
-    }
-    if(!done) e.textContent=I18N[LANG][k];
-  });
-  document.querySelectorAll('[data-i18n-ph]').forEach(e=>{ const k=e.getAttribute('data-i18n-ph'); if(I18N[LANG][k]!==undefined) e.placeholder=I18N[LANG][k]; });
-  renderTCP(); renderWK(); renderTM(); renderPE(); renderPA(); recalc(); renderHist(); renderObraView();
-  // Force money formatting after every re-render — dynamic inputs (TCP/etc.) come out raw from renderX
-  // and need pt-PT normalization. fmtNumDisp is now always pt-PT so this is safe regardless of LANG.
-  applyMoneyFormat();
-}
-
-/* ============================ boot ============================ */
-(async function init(){
-  document.getElementById('ver-badge').textContent=APP_VER;
-  document.getElementById('ver-line').textContent=APP_VER;
-  // money input focus/blur formatting (delegated, capture phase since focus/blur don't bubble)
-  document.addEventListener('focus', e=>{
-    if(e.target?.matches?.('.inp.money')) e.target.value=toRaw(e.target.value);
-  }, true);
-  document.addEventListener('blur', e=>{
-    if(e.target?.matches?.('.inp.money')){ e.target.value=fmtNumDisp(e.target.value); recalc(); }
-  }, true);
-  set('m-data',new Date().toISOString().slice(0,10)); state.meta.data=val('m-data');
-  setLang(LANG);
-  writeForm();
-  recalc();
-  DB=await loadDB();
-  renderHist(); renderObraView();
-  // If URL has ?id=<recordId>, auto-open that record in the editor (new-window flow)
-  const urlId = new URLSearchParams(location.search).get('id');
-  if(urlId){
-    const rec=DB.find(r=>r.id===urlId);
-    if(rec) loadRecord(urlId);
-    else    toast(t('ov.notfound'));
-  } else {
-    // boot: editor hidden; user opens via "Novo período" or by clicking a row
-    hideEditor();
-  }
-})();
+/* Auto-login só aqui, depois de tudo estar definido */
+if(store.get("esporao_auth")==="1")openApp();
 </script>
 </body>
 </html>
